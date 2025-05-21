@@ -706,7 +706,7 @@ IMPORTANT SETUP INFORMATION:
         
         if (values == null || values.Count < 2)
         {
-            Debug.LogWarning("Not enough data in events sheet");
+            Debug.LogWarning("[CRITICAL] Not enough data in events sheet");
             return;
         }
         
@@ -714,7 +714,18 @@ IMPORTANT SETUP INFORMATION:
         List<string> headers = values[0];
         Dictionary<string, int> columnMap = CreateColumnMap(headers);
         
-        Debug.Log($"Events sheet headers: {string.Join(", ", headers)}");
+        // Verify we have the required columns
+        string[] requiredColumns = { "city_id", "tickets_sold", "average_attendance", "number_of_events" };
+        foreach (var column in requiredColumns)
+        {
+            if (!columnMap.ContainsKey(column))
+            {
+                Debug.LogError($"[CRITICAL] Required column '{column}' not found in sheet headers!");
+                return;
+            }
+        }
+        
+        Debug.Log($"[CRITICAL] Events sheet headers: {string.Join(", ", headers)}");
         
         // Clear existing events data to prevent duplicates
         if (dataModel != null)
@@ -722,16 +733,17 @@ IMPORTANT SETUP INFORMATION:
             dataModel.ClearEventMetrics();
         }
         
-        // Dictionary to track the best metrics for each city to prevent zeroes overriding non-zeroes
+        // Dictionary to track the best metrics for each city
         Dictionary<string, EventMetrics> bestMetrics = new Dictionary<string, EventMetrics>();
         
         // Process data rows
         for (int i = 1; i < values.Count; i++)
         {
             List<string> row = values[i];
-            if (row.Count < headers.Count) 
+            // Only skip if the row doesn't have at least the required columns
+            if (row.Count < requiredColumns.Length) 
             {
-                Debug.LogWarning($"Events row {i} has fewer columns ({row.Count}) than headers ({headers.Count})");
+                Debug.LogWarning($"[CRITICAL] Events row {i} has fewer columns ({row.Count}) than required ({requiredColumns.Length})");
                 continue;
             }
             
@@ -739,108 +751,75 @@ IMPORTANT SETUP INFORMATION:
             {
                 Dictionary<string, string> rawData = new Dictionary<string, string>();
                 
-                // Map column values based on headers
+                // Map only the required columns (and timestamp if present)
                 foreach (var column in columnMap)
                 {
+                    // Only map if the column index exists in this row
                     if (column.Value < row.Count)
                     {
-                        rawData[column.Key.ToLower()] = row[column.Value];
+                        string value = row[column.Value].Trim();
+                        rawData[column.Key.ToLower()] = value;
                     }
                 }
                 
                 // Log raw data for debugging
-                Debug.Log($"Processing Events row {i}: {string.Join(", ", rawData.Select(kv => $"{kv.Key}={kv.Value}"))}");
+                Debug.Log($"[CRITICAL] Processing Events row {i}: {string.Join(", ", rawData.Select(kv => $"{kv.Key}={kv.Value}"))}");
                 
-                // Extract city ID - handling special case for first data row
+                // Extract city ID
                 string cityId;
-                if (i == 1) 
+                if (!rawData.TryGetValue("city_id", out cityId) || string.IsNullOrEmpty(cityId))
                 {
-                    // First data row is for BGSNL (national combined metrics)
-                    // If city_id is missing or empty, set a default value of "bgsnl"
-                    if (!rawData.TryGetValue("city_id", out cityId) || string.IsNullOrEmpty(cityId))
+                    if (i == 1)
                     {
                         cityId = "bgsnl";
-                        Debug.Log("First row in Events sheet has been assigned ID 'bgsnl'");
+                        Debug.Log("[CRITICAL] First row in Events sheet has been assigned ID 'bgsnl'");
                     }
-                }
-                else 
-                {
-                    // For other rows, require a city ID
-                    if (!rawData.TryGetValue("city_id", out cityId) || string.IsNullOrEmpty(cityId))
+                    else
                     {
-                        Debug.LogWarning($"Missing city ID in row {i}");
+                        Debug.LogWarning($"[CRITICAL] Missing city ID in row {i}");
                         continue;
                     }
                 }
                 
                 // Normalize city ID (lowercase)
                 cityId = cityId.ToLower().Trim();
-                Debug.Log($"Events row {i} city ID: '{cityId}'");
+                Debug.Log($"[CRITICAL] Events row {i} city ID: '{cityId}'");
                 
-                // Find the associated city
+                // Find or create the associated city
                 City city = dataModel.GetCityById(cityId);
                 if (city == null)
                 {
-                    // If it's the BGSNL data row but no city exists for it, create a default one
-                    if (cityId.ToLower() == "bgsnl")
-                    {
-                        city = new City("BGSNL", "bgsnl");
-                        dataModel.AddCity(city);
-                        Debug.Log("Created default BGSNL city entry for Events");
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"Unknown city ID: {cityId}");
-                        continue;
-                    }
+                    string cityName = char.ToUpper(cityId[0]) + cityId.Substring(1);
+                    city = new City(cityName, cityId);
+                    dataModel.AddCity(city);
+                    Debug.Log($"[CRITICAL] Auto-created city entry for Events: {cityName} (ID: {cityId})");
                 }
-                
-                // Check if required fields exist
-                bool hasTicketsSold = rawData.ContainsKey("tickets_sold");
-                bool hasAverageAttendance = rawData.ContainsKey("average_attendance");
-                bool hasNumberOfEvents = rawData.ContainsKey("number_of_events");
-                
-                Debug.Log($"Events row {i} has fields - tickets_sold: {hasTicketsSold}, " +
-                          $"average_attendance: {hasAverageAttendance}, number_of_events: {hasNumberOfEvents}");
                 
                 // Create and populate metrics object
                 EventMetrics metrics = new EventMetrics("0", "0", "0", city, DateTime.Now);
                 metrics.UpdateFromRawData(rawData);
                 
                 // Log the metrics
-                Debug.Log($"Created events metrics for {city.Name} (ID: {city.ID}) - " +
+                Debug.Log($"[CRITICAL] Created events metrics for {city.Name} (ID: {city.ID}) - " +
                           $"Tickets: {metrics.TicketsSold}, Attendance: {metrics.AverageAttendance}, Events: {metrics.NumberOfEvents}");
                 
-                // Only add to dataModel if this is the best metrics for this city
-                bool shouldAdd = true;
-                if (bestMetrics.ContainsKey(cityId))
-                {
-                    var existing = bestMetrics[cityId];
-                    
-                    // If existing metrics has non-zero values and current one has all zeroes, don't replace
-                    if ((existing.TicketsSold != "0" || existing.AverageAttendance != "0" || existing.NumberOfEvents != "0") &&
-                        (metrics.TicketsSold == "0" && metrics.AverageAttendance == "0" && metrics.NumberOfEvents == "0"))
-                    {
-                        shouldAdd = false;
-                        Debug.Log($"Skipping zero-value metrics for {city.Name} (ID: {city.ID}) because better metrics exist");
-                    }
-                    else if (metrics.TicketsSold != "0" || metrics.AverageAttendance != "0" || metrics.NumberOfEvents != "0")
-                    {
-                        shouldAdd = true;
-                        Debug.Log($"Replacing existing metrics for {city.Name} (ID: {city.ID}) with better non-zero metrics");
-                    }
-                }
-                
-                if (shouldAdd)
+                // Always add the metrics if they have any non-zero values
+                if (metrics.TicketsSold != "0" || metrics.AverageAttendance != "0" || metrics.NumberOfEvents != "0")
                 {
                     bestMetrics[cityId] = metrics;
-                    Debug.Log($"Added/Updated best metrics for {city.Name} (ID: {city.ID})");
+                    Debug.Log($"[CRITICAL] Added metrics for {city.Name} (ID: {city.ID}) with non-zero values");
+                }
+                else if (!bestMetrics.ContainsKey(cityId))
+                {
+                    // Only add zero metrics if we don't have any metrics for this city yet
+                    bestMetrics[cityId] = metrics;
+                    Debug.Log($"[CRITICAL] Added zero metrics for {city.Name} (ID: {city.ID}) as first entry");
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Error processing event row {i}: {ex.Message}");
-                Debug.LogError($"Stack trace: {ex.StackTrace}");
+                Debug.LogError($"[CRITICAL] Error processing event row {i}: {ex.Message}");
+                Debug.LogError($"[CRITICAL] Stack trace: {ex.StackTrace}");
             }
         }
         
@@ -848,11 +827,11 @@ IMPORTANT SETUP INFORMATION:
         foreach (var metric in bestMetrics.Values)
         {
             dataModel.AddEventMetrics(metric);
-            Debug.Log($"Final event metrics for {metric.AssociatedCity.Name} (ID: {metric.AssociatedCity.ID}) - " +
+            Debug.Log($"[CRITICAL] Final event metrics for {metric.AssociatedCity.Name} (ID: {metric.AssociatedCity.ID}) - " +
                      $"Tickets: {metric.TicketsSold}, Attendance: {metric.AverageAttendance}, Events: {metric.NumberOfEvents}");
         }
         
-        Debug.Log($"Processed {values.Count - 1} event metrics entries, added {bestMetrics.Count} final metrics");
+        Debug.Log($"[CRITICAL] Processed {values.Count - 1} event metrics entries, added {bestMetrics.Count} final metrics");
         Debug.Log("=== EVENTS PROCESSING COMPLETED ===");
     }
     
@@ -1193,9 +1172,11 @@ IMPORTANT SETUP INFORMATION:
             dataModel.ClearEventMetrics();
         }
         
-        // Fetch new data
-        yield return FetchSocialMediaData();
-        yield return FetchEventData();
+        // Fetch new data with proper waiting
+        yield return StartCoroutine(FetchSocialMediaData());
+        yield return new WaitForSeconds(0.5f); // Add delay between fetches
+        yield return StartCoroutine(FetchEventData());
+        yield return new WaitForSeconds(0.5f); // Add delay after all fetches
         
         // Verify we got data for our city
         bool hasNewCityData = false;
@@ -1203,7 +1184,7 @@ IMPORTANT SETUP INFORMATION:
         {
             hasNewCityData = (dataModel.SocialMediaMetrics != null && 
                              dataModel.SocialMediaMetrics.Any(m => m.AssociatedCity != null && 
-                                                                 m.AssociatedCity.ID.ToLower() == cityToMaintain.ToLower())) ||
+                                                                 m.AssociatedCity.ID.ToLower() == cityToMaintain.ToLower())) &&
                             (dataModel.EventMetrics != null && 
                              dataModel.EventMetrics.Any(m => m.AssociatedCity != null && 
                                                            m.AssociatedCity.ID.ToLower() == cityToMaintain.ToLower()));

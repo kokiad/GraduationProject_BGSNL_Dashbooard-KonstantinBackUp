@@ -320,46 +320,66 @@ public class DataModelClasses : MonoBehaviour
 
     public EventMetrics GetLatestEventMetrics(string cityId)
     {
-        // Find all metrics for this city ID (case-insensitive)
-        var metrics = eventMetrics
-            .FindAll(m => m.AssociatedCity.ID.ToLower() == cityId.ToLower());
-        
-        Debug.Log($"Found {metrics.Count} event metrics entries for city ID '{cityId}'");
-        
-        if (metrics.Count > 0)
+        if (string.IsNullOrEmpty(cityId))
         {
-            // Sort by timestamp (newest first)
-            metrics = metrics.OrderByDescending(m => m.Timestamp).ToList();
-            
-            // Log all found entries to help debug
-            for (int i = 0; i < metrics.Count; i++)
-            {
-                var metric = metrics[i];
-                Debug.Log($"Event metric {i+1} for {cityId}: " +
-                          $"Tickets={metric.TicketsSold}, " +
-                          $"Attendance={metric.AverageAttendance}, " +
-                          $"Events={metric.NumberOfEvents}, " +
-                          $"Time={metric.Timestamp}");
-            }
-            
-            // Return the one with non-zero values if possible
-            foreach (var metric in metrics)
-            {
-                if (metric.TicketsSold != "0" || metric.AverageAttendance != "0" || metric.NumberOfEvents != "0")
-                {
-                    Debug.Log($"Using non-zero event metric for {cityId}: " +
-                             $"Tickets={metric.TicketsSold}, " +
-                             $"Attendance={metric.AverageAttendance}, " +
-                             $"Events={metric.NumberOfEvents}");
-                    return metric;
-                }
-            }
-            
-            // If all are zeroes, just return the newest one
-            Debug.Log($"All metrics for {cityId} have zero values, using newest one");
-            return metrics.First();
+            Debug.LogWarning("[CRITICAL] GetLatestEventMetrics called with null or empty cityId");
+            return null;
         }
-        
-        return null;
+
+        cityId = cityId.ToLower().Trim();
+        Debug.Log($"[CRITICAL] Getting latest event metrics for city ID: {cityId}");
+
+        var cityMetrics = eventMetrics
+            .Where(m => m.AssociatedCity != null && m.AssociatedCity.ID.ToLower() == cityId)
+            .ToList();
+
+        Debug.Log($"[CRITICAL] Found {cityMetrics.Count} metrics for city {cityId}");
+
+        if (cityMetrics.Count == 0)
+        {
+            Debug.LogWarning($"[CRITICAL] No metrics found for city {cityId}");
+            return null;
+        }
+
+        // Sort by timestamp descending
+        cityMetrics.Sort((a, b) => b.Timestamp.CompareTo(a.Timestamp));
+
+        // Log all found metrics
+        foreach (var metric in cityMetrics)
+        {
+            Debug.Log($"[CRITICAL] Found metric for {cityId}: " +
+                     $"Tickets={metric.TicketsSold}, " +
+                     $"Attendance={metric.AverageAttendance}, " +
+                     $"Events={metric.NumberOfEvents}, " +
+                     $"Timestamp={metric.Timestamp}");
+        }
+
+        // First try to find a complete metric (all non-zero values)
+        var completeMetric = cityMetrics.FirstOrDefault(m => 
+            m.TicketsSold != "0" && 
+            m.AverageAttendance != "0" && 
+            m.NumberOfEvents != "0");
+
+        if (completeMetric != null)
+        {
+            Debug.Log($"[CRITICAL] Found complete metric for {cityId} with all non-zero values");
+            return completeMetric;
+        }
+
+        // If no complete metric, look for a partial metric (at least one non-zero value)
+        var partialMetric = cityMetrics.FirstOrDefault(m => 
+            m.TicketsSold != "0" || 
+            m.AverageAttendance != "0" || 
+            m.NumberOfEvents != "0");
+
+        if (partialMetric != null)
+        {
+            Debug.Log($"[CRITICAL] Found partial metric for {cityId} with some non-zero values");
+            return partialMetric;
+        }
+
+        // If all metrics are zero, return the newest one
+        Debug.Log($"[CRITICAL] All metrics for {cityId} are zero, returning newest");
+        return cityMetrics[0];
     }
 }

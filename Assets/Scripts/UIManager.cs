@@ -209,13 +209,25 @@ public class UIManager : MonoBehaviour
     private IEnumerator WaitAndUpdateDashboard()
     {
         LogDebug("[UIManager] Waiting for data to load...");
-        
-        // Wait for data loading to complete
-        yield return new WaitForSeconds(1.5f);
-        
+
+        // Wait for data loading to complete (up to 10 seconds)
+        float timeout = 10f;
+        float timer = 0f;
+        while (timer < timeout)
+        {
+            if (dataModel != null &&
+                dataModel.SocialMediaMetrics.Count > 0 &&
+                dataModel.EventMetrics.Count > 0)
+            {
+                break;
+            }
+            yield return new WaitForSeconds(0.2f);
+            timer += 0.2f;
+        }
+
         // Find UI references first
         FindUIReferences();
-        
+
         // Update the dashboard
         LogDebug("[UIManager] Wait complete, updating dashboard...");
         UpdateDashboard();
