@@ -573,6 +573,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GoogleAPI: 242650185588-l2mv2ak7m1kf8e2c9ll9uhf37c1mplp3.apps.googleusercontent.com
+  firebaseDatabaseURL: https://bgsnl-dashboard--signin-default-rtdb.europe-west1.firebasedatabase.app/
+  debugText: {fileID: 0}
+  roleSceneMappings: []
+  defaultSceneIndex: 1
+  loadingPanel: {fileID: 0}
+  loginButton: {fileID: 0}
 --- !u!4 &1679109675
 Transform:
   m_ObjectHideFlags: 0
@@ -635,7 +641,19 @@ PrefabInstance:
     - target: {fileID: 3840292480809874415, guid: f7a69cb7d28e1a144a0845f8d31ce9a1, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1679109673}
+      objectReference: {fileID: 1679109674}
+    - target: {fileID: 3840292480809874415, guid: f7a69cb7d28e1a144a0845f8d31ce9a1, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: LogOut
+      objectReference: {fileID: 0}
+    - target: {fileID: 3840292480809874415, guid: f7a69cb7d28e1a144a0845f8d31ce9a1, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: LoginWithGoogle, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 3840292480809874415, guid: f7a69cb7d28e1a144a0845f8d31ce9a1, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 4777373146012995040, guid: f7a69cb7d28e1a144a0845f8d31ce9a1, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

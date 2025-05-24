@@ -1142,7 +1142,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &888526411
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1472,7 +1472,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &984151589
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1861,7 +1861,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1073025558
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2190,7 +2190,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 50, y: -450}
+  m_AnchoredPosition: {x: 50, y: -129}
   m_SizeDelta: {x: 1250, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1326290590
@@ -2240,8 +2240,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 90
-  m_fontSizeBase: 90
+  m_fontSize: 60
+  m_fontSizeBase: 60
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -2320,8 +2320,39 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GoogleAPI: 242650185588-l2mv2ak7m1kf8e2c9ll9uhf37c1mplp3.apps.googleusercontent.com
+  firebaseDatabaseURL: https://bgsnl-dashboard--signin-default-rtdb.europe-west1.firebasedatabase.app/
+  debugText: {fileID: 1326290590}
+  roleSceneMappings:
+  - roleName: bgsnl
+    sceneIndex: 1
+    description: BGSNL Main Dashboard (with cities dropdown)
+  - roleName: bgsg
+    sceneIndex: 5
+    description: Groningen Dashboard
+  - roleName: bgsr
+    sceneIndex: 6
+    description: Rotterdam Dashboard
+  - roleName: bgsl
+    sceneIndex: 7
+    description: Leeuwarden Dashboard
+  - roleName: bgsa
+    sceneIndex: 8
+    description: Amsterdam Dashboard
+  - roleName: bgsb
+    sceneIndex: 9
+    description: Breda Dashboard
+  - roleName: bgsm
+    sceneIndex: 10
+    description: Maastricht Dashboard
+  - roleName: bgse
+    sceneIndex: 11
+    description: Eindhoven Dashboard
+  - roleName: admin
+    sceneIndex: 1
+    description: Admin access (same as BGSNL)
+  defaultSceneIndex: 1
   loadingPanel: {fileID: 0}
-  loginButton: {fileID: 0}
+  loginButton: {fileID: 880552140}
 --- !u!4 &1618233849
 Transform:
   m_ObjectHideFlags: 0

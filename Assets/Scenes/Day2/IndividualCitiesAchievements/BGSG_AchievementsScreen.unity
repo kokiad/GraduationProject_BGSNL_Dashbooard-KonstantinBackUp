@@ -306,6 +306,57 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!1 &1165471488
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1165471490}
+  - component: {fileID: 1165471489}
+  m_Layer: 0
+  m_Name: GoogleAuthentication
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1165471489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1165471488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83f6dd359b8b6db4f8c6362a95a25cd3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GoogleAPI: 242650185588-l2mv2ak7m1kf8e2c9ll9uhf37c1mplp3.apps.googleusercontent.com
+  firebaseDatabaseURL: https://bgsnl-dashboard--signin-default-rtdb.europe-west1.firebasedatabase.app/
+  debugText: {fileID: 0}
+  roleSceneMappings: []
+  defaultSceneIndex: 1
+  loadingPanel: {fileID: 0}
+  loginButton: {fileID: 0}
+--- !u!4 &1165471490
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1165471488}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 607.30164, y: 2211.3804, z: -7.793962}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1194536454
 GameObject:
   m_ObjectHideFlags: 0
@@ -606,6 +657,22 @@ PrefabInstance:
     - target: {fileID: 456673649082341885, guid: c534d497bbd700f44b441dcb8ee99e24, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1268761902659313415, guid: c534d497bbd700f44b441dcb8ee99e24, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1165471489}
+    - target: {fileID: 1268761902659313415, guid: c534d497bbd700f44b441dcb8ee99e24, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: LogOut
+      objectReference: {fileID: 0}
+    - target: {fileID: 1268761902659313415, guid: c534d497bbd700f44b441dcb8ee99e24, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: LoginWithGoogle, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 1268761902659313415, guid: c534d497bbd700f44b441dcb8ee99e24, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 1577854639846799732, guid: c534d497bbd700f44b441dcb8ee99e24, type: 3}
       propertyPath: m_AnchorMax.y
@@ -997,3 +1064,4 @@ SceneRoots:
   - {fileID: 365967577}
   - {fileID: 1324873584}
   - {fileID: 1194536455}
+  - {fileID: 1165471490}

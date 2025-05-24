@@ -71,14 +71,25 @@ public class UIManager : MonoBehaviour
         
         // Check if we should force default city
         bool shouldForceDefaultCity = forceDefaultCity;
+        bool isLoginSession = false;
+        
         if (PlayerPrefs.HasKey("ForceDefaultCity"))
         {
             shouldForceDefaultCity = PlayerPrefs.GetInt("ForceDefaultCity") == 1;
-            LogDebug($"[UIManager] Found ForceDefaultCity in PlayerPrefs: {shouldForceDefaultCity}");
+            isLoginSession = PlayerPrefs.GetInt("ForceDefaultCity") == 0; // 0 means user just logged in
+            LogDebug($"[UIManager] Found ForceDefaultCity in PlayerPrefs: {shouldForceDefaultCity}, isLoginSession: {isLoginSession}");
         }
         
-        // Only reset to default city when the app first starts or when explicitly requested
-        if (isFirstRun && shouldForceDefaultCity)
+        // If this is a login session, don't reset to default - respect the login-set city
+        if (isLoginSession)
+        {
+            LogDebug("[UIManager] Login session detected - will use login-set city ID");
+            // Don't reset, just ensure we're not forcing default next time
+            PlayerPrefs.SetInt("ForceDefaultCity", 1);
+            PlayerPrefs.Save();
+        }
+        // Only reset to default city when the app first starts (not login) or when explicitly requested
+        else if (isFirstRun && shouldForceDefaultCity)
         {
             ResetToDefaultCity();
             LogDebug("[UIManager] First run or forced reset - Reset to default city (BGSNL)");
@@ -194,13 +205,26 @@ public class UIManager : MonoBehaviour
         if (string.IsNullOrEmpty(cityId))
             return false;
             
+        // Always accept BGSNL
         if (cityId.ToLower() == "bgsnl")
             return true;
             
+        // Check configured cities
         foreach (var config in cityConfigs)
         {
             if (config.cityId.ToLower() == cityId.ToLower())
                 return true;
+        }
+        
+        // Accept any valid BGS city role (even if not configured in inspector)
+        string[] validBgsCities = { "bgsg", "bgsr", "bgsl", "bgsa", "bgsb", "bgsm", "bgse", "admin" };
+        foreach (string validCity in validBgsCities)
+        {
+            if (cityId.ToLower() == validCity.ToLower())
+            {
+                LogDebug($"[UIManager] Accepting valid BGS city '{cityId}' even though not configured in inspector");
+                return true;
+            }
         }
         
         return false;
@@ -209,7 +233,7 @@ public class UIManager : MonoBehaviour
     private IEnumerator WaitAndUpdateDashboard()
     {
         LogDebug("[UIManager] Waiting for data to load...");
-
+        
         // Wait for data loading to complete (up to 10 seconds)
         float timeout = 10f;
         float timer = 0f;
@@ -224,10 +248,10 @@ public class UIManager : MonoBehaviour
             yield return new WaitForSeconds(0.2f);
             timer += 0.2f;
         }
-
+        
         // Find UI references first
         FindUIReferences();
-
+        
         // Update the dashboard
         LogDebug("[UIManager] Wait complete, updating dashboard...");
         UpdateDashboard();
@@ -496,7 +520,7 @@ public class UIManager : MonoBehaviour
         LogDebug($"[UIManager] Updating logo for city: '{cityId}'");
         
         // BGSNL special case - always use bgsnlLogo
-        if (cityId.ToLower() == "bgsnl")
+        if (cityId.ToLower() == "bgsnl" || cityId.ToLower() == "admin")
         {
             if (bgsnlLogo != null)
             {
@@ -531,6 +555,22 @@ public class UIManager : MonoBehaviour
                     }
                 }
             }
+            
+            // If no custom logo found, try to use BGSNL logo as fallback for any BGS city
+            if (!foundCustomLogo)
+            {
+                string[] validBgsCities = { "bgsg", "bgsr", "bgsl", "bgsa", "bgsb", "bgsm", "bgse" };
+                foreach (string validCity in validBgsCities)
+                {
+                    if (cityId.ToLower() == validCity.ToLower())
+                    {
+                        LogDebug($"[UIManager] No custom logo for '{cityId}', using BGSNL logo as fallback");
+                        logoToUse = bgsnlLogo;
+                        foundCustomLogo = true;
+                        break;
+                    }
+                }
+            }
         }
         
         // Apply the logo
@@ -544,10 +584,10 @@ public class UIManager : MonoBehaviour
             LogError($"[UIManager] No logo found for '{cityId}'");
         }
         
-        // Log if using default
-        if (!foundCustomLogo)
+        // Log if using fallback
+        if (!foundCustomLogo && logoToUse == bgsnlLogo)
         {
-            LogError($"[UIManager] No custom logo found for '{cityId}', using default logo");
+            LogDebug($"[UIManager] Using BGSNL logo as fallback for '{cityId}'");
         }
     }
     
@@ -682,90 +722,116 @@ public class UIManager : MonoBehaviour
     {
         Debug.Log($"[UIManager] Scene loaded: {scene.name}");
         
-        // If main scene, update the dashboard
-        if (scene.name == mainSceneName)
+        // Define the exact list of valid dashboard scenes
+        string[] validDashboardScenes = { 
+            "HomeScreen",   // Default and BGSNL specific scene
+            "BGSG",         // Groningen
+            "BGSR",         // Rotterdam
+            "BGSL",         // Leeuwarden
+            "BGSA",         // Amsterdam
+            "BGSB",         // Breda  
+            "BGSM",         // Maastricht
+            "BGSE"          // Eindhoven
+        };
+        
+        // Check if this is a valid dashboard scene
+        bool isDashboardScene = false;
+        foreach (string validScene in validDashboardScenes)
         {
-            // CRITICAL CHECK: Check if we have a special backup city ID from pull-to-refresh
-            if (PlayerPrefs.HasKey("PullRefresh_PreservedCityId"))
+            if (scene.name == validScene)
             {
-                string preservedCity = PlayerPrefs.GetString("PullRefresh_PreservedCityId");
-                
-                if (!string.IsNullOrEmpty(preservedCity) && IsCityValid(preservedCity))
-                {
-                    Debug.Log($"[CRITICAL] Found preserved city ID: '{preservedCity}' from pull-to-refresh. Using this instead of PlayerPrefs.");
-                    
-                    // Override the SelectedCityId in PlayerPrefs with our preserved value
-                    PlayerPrefs.SetString("SelectedCityId", preservedCity);
-                    PlayerPrefs.SetInt("ForceDefaultCity", 0);
-                    PlayerPrefs.Save();
-                    
-                    // Also set current city directly
-                    currentCityId = preservedCity;
-                    
-                    // IMPORTANT: Do not clear the backup key yet - we'll keep it until the dashboard is updated
-                    // This ensures if there are any late resets, our backup is still there
-                }
+                isDashboardScene = true;
+                break;
             }
+        }
+        
+        if (isDashboardScene)
+        {
+            Debug.Log($"[UIManager] Valid dashboard scene detected: {scene.name}");
             
-            // Get the city ID from PlayerPrefs
-            if (PlayerPrefs.HasKey("SelectedCityId"))
+            // Check if this is a login session (ForceDefaultCity = 0)
+            bool isLoginSession = PlayerPrefs.HasKey("ForceDefaultCity") && PlayerPrefs.GetInt("ForceDefaultCity") == 0;
+            
+            if (isLoginSession)
             {
-                string savedCity = PlayerPrefs.GetString("SelectedCityId").ToLower();
-                
-                if (IsCityValid(savedCity))
+                Debug.Log("[UIManager] Login session - preserving login-set city ID");
+                // Don't reset anything, just use what was set during login
+                if (PlayerPrefs.HasKey("SelectedCityId"))
                 {
-                    // Note: This is deliberately different from ResetToDefaultCity which would
-                    // overwrite PlayerPrefs with "bgsnl"
-                    currentCityId = savedCity;
-                    Debug.Log($"[UIManager] Loaded city from PlayerPrefs: '{currentCityId}'");
-                }
-                else
-                {
-                    // Before defaulting to BGSNL, check if we have a preserved city
-                    if (PlayerPrefs.HasKey("PullRefresh_PreservedCityId"))
+                    string loginCity = PlayerPrefs.GetString("SelectedCityId").ToLower();
+                    if (IsCityValid(loginCity))
                     {
-                        string preservedCity = PlayerPrefs.GetString("PullRefresh_PreservedCityId");
-                        if (IsCityValid(preservedCity))
-                        {
-                            currentCityId = preservedCity;
-                            Debug.Log($"Using preserved city as fallback: '{preservedCity}'");
-                        }
-                        else
-                        {
-                            Debug.LogError($"[UIManager] City in PlayerPrefs '{savedCity}' is not valid, defaulting to BGSNL");
-                            ResetToDefaultCity();
-                        }
+                        currentCityId = loginCity;
+                        Debug.Log($"[UIManager] Using login-set city: '{currentCityId}'");
+                        
+                        // CRITICAL: Force immediate dashboard update for login sessions
+                        Debug.Log($"[UIManager] Forcing immediate dashboard update for login city: '{currentCityId}'");
+                        
+                        // Find UI references immediately
+                        FindUIReferences();
+                        
+                        // Update dashboard immediately without delay for login sessions
+                        UpdateDashboard();
+                        
+                        // Also schedule a delayed update as backup
+                        StartCoroutine(DelayedUpdateDashboard());
+                    }
                 }
-                else
-                {
-                    Debug.LogError($"[UIManager] City in PlayerPrefs '{savedCity}' is not valid, defaulting to BGSNL");
-                    ResetToDefaultCity();
-                }
-            }
+                
+                // Mark that login session is processed
+                PlayerPrefs.SetInt("ForceDefaultCity", 1);
+                PlayerPrefs.Save();
+                
+                // Exit early since we've already updated the dashboard
+                return;
             }
             else
             {
-                // Before defaulting to BGSNL, check if we have a preserved city
+                // CRITICAL CHECK: Check if we have a special backup city ID from pull-to-refresh
                 if (PlayerPrefs.HasKey("PullRefresh_PreservedCityId"))
                 {
                     string preservedCity = PlayerPrefs.GetString("PullRefresh_PreservedCityId");
-                    if (IsCityValid(preservedCity))
+                    
+                    if (!string.IsNullOrEmpty(preservedCity) && IsCityValid(preservedCity))
                     {
+                        Debug.Log($"[CRITICAL] Found preserved city ID: '{preservedCity}' from pull-to-refresh. Using this instead of PlayerPrefs.");
+                        
+                        // Override the SelectedCityId in PlayerPrefs with our preserved value
+                        PlayerPrefs.SetString("SelectedCityId", preservedCity);
+                        PlayerPrefs.SetInt("ForceDefaultCity", 0);
+                        PlayerPrefs.Save();
+                        
+                        // Also set current city directly
                         currentCityId = preservedCity;
-                        Debug.Log($"No city in PlayerPrefs, using preserved city: '{preservedCity}'");
+                        
+                        // IMPORTANT: Do not clear the backup key yet - we'll keep it until the dashboard is updated
+                        // This ensures if there are any late resets, our backup is still there
+                    }
+                }
+                
+                // Get the city ID from PlayerPrefs (normal operation)
+                if (PlayerPrefs.HasKey("SelectedCityId"))
+                {
+                    string savedCity = PlayerPrefs.GetString("SelectedCityId").ToLower();
+                    
+                    if (IsCityValid(savedCity))
+                    {
+                        // Note: This is deliberately different from ResetToDefaultCity which would
+                        // overwrite PlayerPrefs with "bgsnl"
+                        currentCityId = savedCity;
+                        Debug.Log($"[UIManager] Loaded city from PlayerPrefs: '{currentCityId}'");
                     }
                     else
                     {
-                        // Default to BGSNL if no city is saved
+                        Debug.LogError($"[UIManager] City in PlayerPrefs '{savedCity}' is not valid, defaulting to BGSNL");
                         ResetToDefaultCity();
-                        Debug.Log("[UIManager] No valid city found in PlayerPrefs or backup, defaulting to BGSNL");
+                    }
                 }
-            }
-            else
-            {
-                // Default to BGSNL if no city is saved
-                ResetToDefaultCity();
-                Debug.Log("[UIManager] No city found in PlayerPrefs, defaulting to BGSNL");
+                else
+                {
+                    // Default to BGSNL if no city is saved
+                    ResetToDefaultCity();
+                    Debug.Log("[UIManager] No city found in PlayerPrefs, defaulting to BGSNL");
                 }
             }
             

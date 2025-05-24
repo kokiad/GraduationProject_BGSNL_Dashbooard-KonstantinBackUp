@@ -20,4 +20,67 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Day2/AchievementsScreen.unity
     guid: b1c93e2fceb5569498c6d0469d249759
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesDashboards/BGSG.unity
+    guid: 53436ba2e98b404489f86dad9b7157ca
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesDashboards/BGSR.unity
+    guid: 4d4a89d6998057741bb5c882f1fc4689
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesDashboards/BGSL.unity
+    guid: 030b1a7a396c61443a3f08c844f7ed8e
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesDashboards/BGSA.unity
+    guid: b84ee078a13e21c4f80cc27453572fed
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesDashboards/BGSB.unity
+    guid: 55b6fea47cf1441489a9f4c786ec935d
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesDashboards/BGSM.unity
+    guid: 6136241d057aa104aae9c876ea258447
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesDashboards/BGSE.unity
+    guid: d6ee902e932ab5449b2770ab2e66be39
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesCharts/BGSG_ChartsScreen.unity
+    guid: 8b268d4a4e687e647a240dc583fbd9ed
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesCharts/BGSR_ChartsScreen.unity
+    guid: c6c2fa3bb8cd27d43be11306c99c8ded
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesCharts/BGSL_ChartsScreen.unity
+    guid: 671ed4cd5a2985d4f9600bb0da3d3830
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesCharts/BGSA_ChartsScreen.unity
+    guid: 822fcfe8e938d0a40a5d4bfbb0a2d34d
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesCharts/BGSB_ChartsScreen.unity
+    guid: 40d6ba517fe48ec4d858b038f2281170
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesCharts/BGSM_ChartsScreen.unity
+    guid: 0e0848bdf06e4314f929e06d9034325b
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesCharts/BGSE_ChartsScreen.unity
+    guid: 7c77c475c93d95746beed5ecf0618418
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesAchievements/BGSG_AchievementsScreen.unity
+    guid: 9969f9de23056cf47b669d2130b6723e
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesAchievements/BGSR_AchievementsScreen.unity
+    guid: 8657514eb4694494fad803534ce048de
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesAchievements/BGSL_AchievementsScreen.unity
+    guid: bb8c7ef785151534491eaeb672e61747
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesAchievements/BGSA_AchievementsScreen.unity
+    guid: 5ea18f876365e1d499fbe9e613f107dc
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesAchievements/BGSB_AchievementsScreen.unity
+    guid: 87d28cd26f9357c4190d29b41b31eec4
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesAchievements/BGSM_AchievementsScreen.unity
+    guid: e1c63af7f27e5eb49a2106d6298821d6
+  - enabled: 1
+    path: Assets/Scenes/Day2/IndividualCitiesAchievements/BGSE_AchievementsScreen.unity
+    guid: 455dc4d350f089e458dd62fc711ed812
   m_configObjects: {}

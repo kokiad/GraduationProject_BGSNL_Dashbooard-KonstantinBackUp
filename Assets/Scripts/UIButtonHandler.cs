@@ -17,7 +17,8 @@ public class UIButtonHandler : MonoBehaviour
         CitiesScene,
         CityButton,
         ChartsScene,
-        AchievementsScene
+        AchievementsScene,
+        HomeSoloCities // Refresh button for individual city scenes
     }
 
     [Header("Button Configuration")]
@@ -109,6 +110,10 @@ public class UIButtonHandler : MonoBehaviour
                 
             case ButtonType.AchievementsScene:
                 button.onClick.AddListener(GoToAchievementsScene);
+                break;
+                
+            case ButtonType.HomeSoloCities:
+                button.onClick.AddListener(RefreshCurrentScene);
                 break;
         }
         
@@ -273,9 +278,64 @@ public class UIButtonHandler : MonoBehaviour
             activeDropdown = null;
         }
         
+        // Determine which charts scene to load
+        string targetScene;
+        
+        if (!string.IsNullOrEmpty(cityId))
+        {
+            // Use the cityId set in inspector
+            targetScene = DetermineChartsSceneForCity(cityId);
+            LogDebug($"[UIButtonHandler] Using cityId from inspector: '{cityId}' -> {targetScene}");
+        }
+        else
+        {
+            // No cityId set in inspector, default to original ChartsScreen
+            targetScene = "ChartsScreen";
+            LogDebug("[UIButtonHandler] No cityId set in inspector, using default ChartsScreen");
+        }
+        
         // Load charts scene
-        LogDebug("[UIButtonHandler] Loading ChartsScreen scene");
-        SceneManager.LoadScene("ChartsScreen");
+        LogDebug($"[UIButtonHandler] Loading charts scene: {targetScene}");
+        SceneManager.LoadScene(targetScene);
+    }
+    
+    private string DetermineChartsSceneForCity(string cityId)
+    {
+        // Normalize city ID
+        string normalizedCityId = cityId.ToLower().Trim();
+        
+        // Map city IDs to their charts scene names
+        switch (normalizedCityId)
+        {
+            case "bgsnl":
+            case "admin":
+                return "ChartsScreen"; // Default charts scene for BGSNL/admin
+                
+            case "bgsg":
+                return "BGSG_ChartsScreen";
+                
+            case "bgsr":
+                return "BGSR_ChartsScreen";
+                
+            case "bgsl":
+                return "BGSL_ChartsScreen";
+                
+            case "bgsa":
+                return "BGSA_ChartsScreen";
+                
+            case "bgsb":
+                return "BGSB_ChartsScreen";
+                
+            case "bgsm":
+                return "BGSM_ChartsScreen";
+                
+            case "bgse":
+                return "BGSE_ChartsScreen";
+                
+            default:
+                LogDebug($"[UIButtonHandler] Unknown city ID '{cityId}', falling back to default ChartsScreen");
+                return "ChartsScreen"; // Fallback to default
+        }
     }
     
     private void GoToAchievementsScene()
@@ -287,9 +347,64 @@ public class UIButtonHandler : MonoBehaviour
             activeDropdown = null;
         }
         
+        // Determine which achievements scene to load
+        string targetScene;
+        
+        if (!string.IsNullOrEmpty(cityId))
+        {
+            // Use the cityId set in inspector
+            targetScene = DetermineAchievementsSceneForCity(cityId);
+            LogDebug($"[UIButtonHandler] Using cityId from inspector: '{cityId}' -> {targetScene}");
+        }
+        else
+        {
+            // No cityId set in inspector, default to original AchievementsScreen
+            targetScene = "AchievementsScreen";
+            LogDebug("[UIButtonHandler] No cityId set in inspector, using default AchievementsScreen");
+        }
+        
         // Load achievements scene
-        LogDebug("[UIButtonHandler] Loading AchievementsScreen scene");
-        SceneManager.LoadScene("AchievementsScreen");
+        LogDebug($"[UIButtonHandler] Loading achievements scene: {targetScene}");
+        SceneManager.LoadScene(targetScene);
+    }
+    
+    private string DetermineAchievementsSceneForCity(string cityId)
+    {
+        // Normalize city ID
+        string normalizedCityId = cityId.ToLower().Trim();
+        
+        // Map city IDs to their achievements scene names
+        switch (normalizedCityId)
+        {
+            case "bgsnl":
+            case "admin":
+                return "AchievementsScreen"; // Default achievements scene for BGSNL/admin
+                
+            case "bgsg":
+                return "BGSG_AchievementsScreen";
+                
+            case "bgsr":
+                return "BGSR_AchievementsScreen";
+                
+            case "bgsl":
+                return "BGSL_AchievementsScreen";
+                
+            case "bgsa":
+                return "BGSA_AchievementsScreen";
+                
+            case "bgsb":
+                return "BGSB_AchievementsScreen";
+                
+            case "bgsm":
+                return "BGSM_AchievementsScreen";
+                
+            case "bgse":
+                return "BGSE_AchievementsScreen";
+                
+            default:
+                LogDebug($"[UIButtonHandler] Unknown city ID '{cityId}', falling back to default AchievementsScreen");
+                return "AchievementsScreen"; // Fallback to default
+        }
     }
     
     private void SelectCityAndGoHome()
@@ -330,6 +445,86 @@ public class UIButtonHandler : MonoBehaviour
         LogDebug("[UIButtonHandler] Loading HomeScreen scene");
         SceneManager.LoadScene("HomeScreen");
         Debug.Log($"[IMPORTANT DEBUG] After loading HomeScreen (this may not be seen)");
+    }
+    
+    private void RefreshCurrentScene()
+    {
+        LogDebug("[UIButtonHandler] HomeSoloCities button clicked - navigating to city dashboard");
+        
+        // Close dropdown if it exists
+        if (dropdownMenu != null)
+        {
+            dropdownMenu.SetActive(false);
+            activeDropdown = null;
+        }
+        
+        // Determine which city ID to use
+        string targetCityId;
+        string targetScene;
+        
+        if (!string.IsNullOrEmpty(cityId))
+        {
+            // Use the cityId set in inspector
+            targetCityId = cityId;
+            targetScene = DetermineDashboardSceneForCity(targetCityId);
+            LogDebug($"[UIButtonHandler] Using cityId from inspector: '{cityId}' -> {targetScene}");
+        }
+        else
+        {
+            // No cityId set in inspector, default to HomeScreen
+            targetCityId = "bgsnl";
+            targetScene = "HomeScreen";
+            LogDebug("[UIButtonHandler] No cityId set in inspector, using default HomeScreen");
+        }
+        
+        // Set up PlayerPrefs for the target city
+        PlayerPrefs.SetInt("ForceDefaultCity", 0);
+        PlayerPrefs.SetString("SelectedCityId", targetCityId);
+        PlayerPrefs.Save();
+        
+        LogDebug($"[UIButtonHandler] Navigating to city dashboard: '{targetScene}' for city: '{targetCityId}'");
+        
+        // Load the city's dashboard scene
+        SceneManager.LoadScene(targetScene);
+    }
+    
+    private string DetermineDashboardSceneForCity(string cityId)
+    {
+        // Normalize city ID
+        string normalizedCityId = cityId.ToLower().Trim();
+        
+        // Map city IDs to their dashboard scene names
+        switch (normalizedCityId)
+        {
+            case "bgsnl":
+            case "admin":
+                return "HomeScreen"; // Default dashboard scene for BGSNL/admin
+                
+            case "bgsg":
+                return "BGSG";
+                
+            case "bgsr":
+                return "BGSR";
+                
+            case "bgsl":
+                return "BGSL";
+                
+            case "bgsa":
+                return "BGSA";
+                
+            case "bgsb":
+                return "BGSB";
+                
+            case "bgsm":
+                return "BGSM";
+                
+            case "bgse":
+                return "BGSE";
+                
+            default:
+                LogDebug($"[UIButtonHandler] Unknown city ID '{cityId}', falling back to default HomeScreen");
+                return "HomeScreen"; // Fallback to default
+        }
     }
     
     private void OnDestroy()

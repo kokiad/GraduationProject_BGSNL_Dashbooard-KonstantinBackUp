@@ -767,15 +767,15 @@ IMPORTANT SETUP INFORMATION:
                 
                 // Extract city ID
                 string cityId;
-                if (!rawData.TryGetValue("city_id", out cityId) || string.IsNullOrEmpty(cityId))
+                    if (!rawData.TryGetValue("city_id", out cityId) || string.IsNullOrEmpty(cityId))
                 {
                     if (i == 1)
                     {
                         cityId = "bgsnl";
                         Debug.Log("[CRITICAL] First row in Events sheet has been assigned ID 'bgsnl'");
-                    }
-                    else
-                    {
+                }
+                else 
+                {
                         Debug.LogWarning($"[CRITICAL] Missing city ID in row {i}");
                         continue;
                     }
@@ -791,7 +791,7 @@ IMPORTANT SETUP INFORMATION:
                 {
                     string cityName = char.ToUpper(cityId[0]) + cityId.Substring(1);
                     city = new City(cityName, cityId);
-                    dataModel.AddCity(city);
+                        dataModel.AddCity(city);
                     Debug.Log($"[CRITICAL] Auto-created city entry for Events: {cityName} (ID: {cityId})");
                 }
                 
@@ -808,7 +808,7 @@ IMPORTANT SETUP INFORMATION:
                 {
                     bestMetrics[cityId] = metrics;
                     Debug.Log($"[CRITICAL] Added metrics for {city.Name} (ID: {city.ID}) with non-zero values");
-                }
+                    }
                 else if (!bestMetrics.ContainsKey(cityId))
                 {
                     // Only add zero metrics if we don't have any metrics for this city yet
