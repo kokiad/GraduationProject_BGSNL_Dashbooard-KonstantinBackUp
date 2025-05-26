@@ -2324,31 +2324,31 @@ MonoBehaviour:
   debugText: {fileID: 1326290590}
   roleSceneMappings:
   - roleName: bgsnl
-    sceneIndex: 1
+    sceneIndex: 2
     description: BGSNL Main Dashboard (with cities dropdown)
   - roleName: bgsg
-    sceneIndex: 5
+    sceneIndex: 6
     description: Groningen Dashboard
   - roleName: bgsr
-    sceneIndex: 6
+    sceneIndex: 7
     description: Rotterdam Dashboard
   - roleName: bgsl
-    sceneIndex: 7
+    sceneIndex: 8
     description: Leeuwarden Dashboard
   - roleName: bgsa
-    sceneIndex: 8
+    sceneIndex: 9
     description: Amsterdam Dashboard
   - roleName: bgsb
-    sceneIndex: 9
+    sceneIndex: 10
     description: Breda Dashboard
   - roleName: bgsm
-    sceneIndex: 10
+    sceneIndex: 11
     description: Maastricht Dashboard
   - roleName: bgse
-    sceneIndex: 11
+    sceneIndex: 12
     description: Eindhoven Dashboard
   - roleName: admin
-    sceneIndex: 1
+    sceneIndex: 2
     description: Admin access (same as BGSNL)
   defaultSceneIndex: 1
   loadingPanel: {fileID: 0}

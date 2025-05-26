@@ -786,52 +786,52 @@ public class UIManager : MonoBehaviour
                 return;
             }
             else
+        {
+            // CRITICAL CHECK: Check if we have a special backup city ID from pull-to-refresh
+            if (PlayerPrefs.HasKey("PullRefresh_PreservedCityId"))
             {
-                // CRITICAL CHECK: Check if we have a special backup city ID from pull-to-refresh
-                if (PlayerPrefs.HasKey("PullRefresh_PreservedCityId"))
-                {
-                    string preservedCity = PlayerPrefs.GetString("PullRefresh_PreservedCityId");
-                    
-                    if (!string.IsNullOrEmpty(preservedCity) && IsCityValid(preservedCity))
-                    {
-                        Debug.Log($"[CRITICAL] Found preserved city ID: '{preservedCity}' from pull-to-refresh. Using this instead of PlayerPrefs.");
-                        
-                        // Override the SelectedCityId in PlayerPrefs with our preserved value
-                        PlayerPrefs.SetString("SelectedCityId", preservedCity);
-                        PlayerPrefs.SetInt("ForceDefaultCity", 0);
-                        PlayerPrefs.Save();
-                        
-                        // Also set current city directly
-                        currentCityId = preservedCity;
-                        
-                        // IMPORTANT: Do not clear the backup key yet - we'll keep it until the dashboard is updated
-                        // This ensures if there are any late resets, our backup is still there
-                    }
-                }
+                string preservedCity = PlayerPrefs.GetString("PullRefresh_PreservedCityId");
                 
-                // Get the city ID from PlayerPrefs (normal operation)
-                if (PlayerPrefs.HasKey("SelectedCityId"))
+                if (!string.IsNullOrEmpty(preservedCity) && IsCityValid(preservedCity))
                 {
-                    string savedCity = PlayerPrefs.GetString("SelectedCityId").ToLower();
+                    Debug.Log($"[CRITICAL] Found preserved city ID: '{preservedCity}' from pull-to-refresh. Using this instead of PlayerPrefs.");
                     
-                    if (IsCityValid(savedCity))
-                    {
-                        // Note: This is deliberately different from ResetToDefaultCity which would
-                        // overwrite PlayerPrefs with "bgsnl"
-                        currentCityId = savedCity;
-                        Debug.Log($"[UIManager] Loaded city from PlayerPrefs: '{currentCityId}'");
-                    }
-                    else
-                    {
-                        Debug.LogError($"[UIManager] City in PlayerPrefs '{savedCity}' is not valid, defaulting to BGSNL");
-                        ResetToDefaultCity();
-                    }
+                    // Override the SelectedCityId in PlayerPrefs with our preserved value
+                    PlayerPrefs.SetString("SelectedCityId", preservedCity);
+                    PlayerPrefs.SetInt("ForceDefaultCity", 0);
+                    PlayerPrefs.Save();
+                    
+                    // Also set current city directly
+                    currentCityId = preservedCity;
+                    
+                    // IMPORTANT: Do not clear the backup key yet - we'll keep it until the dashboard is updated
+                    // This ensures if there are any late resets, our backup is still there
                 }
-                else
+            }
+            
+                // Get the city ID from PlayerPrefs (normal operation)
+            if (PlayerPrefs.HasKey("SelectedCityId"))
+            {
+                string savedCity = PlayerPrefs.GetString("SelectedCityId").ToLower();
+                
+                if (IsCityValid(savedCity))
                 {
-                    // Default to BGSNL if no city is saved
-                    ResetToDefaultCity();
-                    Debug.Log("[UIManager] No city found in PlayerPrefs, defaulting to BGSNL");
+                    // Note: This is deliberately different from ResetToDefaultCity which would
+                    // overwrite PlayerPrefs with "bgsnl"
+                    currentCityId = savedCity;
+                    Debug.Log($"[UIManager] Loaded city from PlayerPrefs: '{currentCityId}'");
+                        }
+                        else
+                        {
+                            Debug.LogError($"[UIManager] City in PlayerPrefs '{savedCity}' is not valid, defaulting to BGSNL");
+                            ResetToDefaultCity();
+                }
+            }
+            else
+            {
+                // Default to BGSNL if no city is saved
+                ResetToDefaultCity();
+                Debug.Log("[UIManager] No city found in PlayerPrefs, defaulting to BGSNL");
                 }
             }
             
