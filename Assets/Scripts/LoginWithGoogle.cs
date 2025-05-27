@@ -189,8 +189,8 @@ public class LoginWithGoogle : MonoBehaviour
         
         // Step 2: Initialize Firebase Auth (always needed)
         try
-    {
-        auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
+        {
+            auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
             UpdateDebugText("Firebase Auth initialized successfully.");
         }
         catch (Exception ex)
@@ -356,7 +356,7 @@ public class LoginWithGoogle : MonoBehaviour
     }
 
     // Old InitFirebase is no longer needed as we do it in Start() with proper dependency checking
-    void InitFirebase() 
+    void InitFirebase()
     {
         // This is now handled in Start() with proper dependency checking
     }
@@ -404,7 +404,7 @@ public class LoginWithGoogle : MonoBehaviour
                 WebClientId = GoogleAPI,
                 RequestEmail = true
             };
-            
+
             isGoogleSignInInitialized = true;
             UpdateDebugText("Google Sign-In reinitialized successfully");
         }
@@ -465,7 +465,7 @@ public class LoginWithGoogle : MonoBehaviour
         
         try
         {
-            Task<GoogleSignInUser> signIn = GoogleSignIn.DefaultInstance.SignIn();
+        Task<GoogleSignInUser> signIn = GoogleSignIn.DefaultInstance.SignIn();
             signIn.ContinueWith(task =>
             {
                 if (task.IsCanceled)
@@ -968,8 +968,8 @@ public class LoginWithGoogle : MonoBehaviour
             UpdateDebugText($"Firebase sign out error (non-critical): {ex.Message}");
         }
         
-        // Clear all PlayerPrefs data
-        UpdateDebugText("Clearing all login and session data...");
+        // Clear login and session data (but preserve privacy acknowledgment)
+        UpdateDebugText("Clearing login and session data (preserving privacy acknowledgment)...");
         
         PlayerPrefs.DeleteKey(PREF_MANUAL_LOGIN_SUCCESS);
         PlayerPrefs.DeleteKey(PREF_SAVED_USER_EMAIL);
@@ -977,14 +977,15 @@ public class LoginWithGoogle : MonoBehaviour
         PlayerPrefs.DeleteKey("SelectedCityId");
         PlayerPrefs.DeleteKey("ForceDefaultCity");
         PlayerPrefs.DeleteKey("PullRefresh_PreservedCityId");
-        PlayerPrefs.DeleteKey("HasLaunchedBefore");
+        // NOTE: We do NOT clear "HasLaunchedBefore" during logout to preserve privacy acknowledgment
+        // NOTE: We do NOT clear privacy-related PlayerPrefs (PrivacyAcknowledged, etc.) during logout
         
         // CRITICAL: Keep track that user logged out AND what type of login they had
         PlayerPrefs.SetString(PREF_USER_LOGGED_OUT, "true");
         PlayerPrefs.SetString("LogoutAfterLoginType", lastLoginType);
         PlayerPrefs.Save();
         
-        UpdateDebugText("All PlayerPrefs cleared and logout tracking set");
+        UpdateDebugText("Login data cleared (privacy acknowledgment preserved)");
         
         // Reset all local state variables
         isGoogleSignInInitialized = false;

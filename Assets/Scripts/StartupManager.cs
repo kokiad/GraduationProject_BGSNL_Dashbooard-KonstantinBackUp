@@ -14,7 +14,12 @@ public class StartupManager : MonoBehaviour
     [SerializeField] private GameObject loadingPanel;
     [SerializeField] private TextMeshProUGUI loadingText;
     [SerializeField] private Image loadingSpinner; // Optional rotating spinner
+    [SerializeField] private Slider progressSlider; // Progress slider that fills up during loading
     [SerializeField] private float spinSpeed = 90f; // Degrees per second
+    
+    [Header("Progress Animation Settings")]
+    [SerializeField] private float progressAnimationSpeed = 2f; // How fast the progress bar animates
+    [SerializeField] private bool smoothProgressAnimation = true; // Whether to animate progress smoothly
     
     [Header("Scene Configuration")]
     [SerializeField] private int loginSceneIndex = 1; // Scene index for login
@@ -56,6 +61,18 @@ public class StartupManager : MonoBehaviour
     
     private float startTime;
     
+    // Progress tracking
+    private float currentProgress = 0f;
+    private float targetProgress = 0f;
+    private Coroutine progressAnimationCoroutine;
+    
+    // Progress milestones for different loading steps
+    private const float PROGRESS_INITIALIZATION = 0.1f;
+    private const float PROGRESS_LOGIN_CHECK = 0.3f;
+    private const float PROGRESS_AUTO_LOGIN_SETUP = 0.6f;
+    private const float PROGRESS_SCENE_PREPARATION = 0.8f;
+    private const float PROGRESS_COMPLETE = 1.0f;
+    
     private void Awake()
     {
         // Ensure this scene persists during the startup process
@@ -71,7 +88,11 @@ public class StartupManager : MonoBehaviour
         if (loadingPanel != null)
             loadingPanel.SetActive(true);
             
-        UpdateLoadingText("Initializing...");
+        // Initialize progress slider
+        InitializeProgressSlider();
+        
+        // Set initial progress and loading text
+        SetProgress(0f, "Initializing...");
         
         // Start the startup process
         StartCoroutine(StartupProcess());
@@ -85,9 +106,42 @@ public class StartupManager : MonoBehaviour
     {
         LogDebug("Starting startup process...");
         
-        // Step 1: Check for auto-login data
-        UpdateLoadingText("Checking login status...");
+        // Step 1: Initialization complete
+        SetProgress(PROGRESS_INITIALIZATION, "Initializing...");
         yield return new WaitForSeconds(0.3f); // Brief pause for UI
+        
+        // Step 2: SIMPLIFIED GDPR Privacy Check (only on first use)
+        SetProgress(0.15f, "Checking privacy information...");
+        
+        var simpleGdprManager = FindObjectOfType<SimpleGDPRManager>();
+        if (simpleGdprManager != null && simpleGdprManager.NeedsPrivacyAcknowledgment())
+        {
+            SetProgress(0.2f, "Privacy information required...");
+            LogDebug("User needs to acknowledge privacy information");
+            
+            simpleGdprManager.ShowPrivacyNotice();
+            
+            // Wait for user to acknowledge privacy notice
+            bool privacyAcknowledged = false;
+            System.Action<bool> onPrivacyAcknowledged = (acknowledged) => { privacyAcknowledged = acknowledged; };
+            SimpleGDPRManager.OnPrivacyAcknowledged += onPrivacyAcknowledged;
+            
+            while (!privacyAcknowledged)
+            {
+                yield return new WaitForSeconds(0.5f);
+            }
+            
+            SimpleGDPRManager.OnPrivacyAcknowledged -= onPrivacyAcknowledged;
+            LogDebug("Privacy information acknowledged, continuing...");
+        }
+        else
+        {
+            LogDebug("Privacy already acknowledged or no GDPR manager found");
+        }
+        
+        // Step 3: Check for auto-login data
+        SetProgress(PROGRESS_LOGIN_CHECK, "Checking login status...");
+        yield return new WaitForSeconds(0.5f); // Give time for progress animation
         
         bool shouldAutoLogin = CheckAutoLoginAvailable();
         
@@ -99,7 +153,8 @@ public class StartupManager : MonoBehaviour
             string savedEmail = PlayerPrefs.GetString(PREF_SAVED_USER_EMAIL, "");
             string savedRole = PlayerPrefs.GetString(PREF_SAVED_USER_ROLE, "");
             
-            UpdateLoadingText($"Welcome back, {GetDisplayName(savedEmail)}!");
+            // Step 4: Auto-login setup
+            SetProgress(PROGRESS_AUTO_LOGIN_SETUP, $"Welcome back, {GetDisplayName(savedEmail)}!");
             yield return new WaitForSeconds(1.0f);
             
             LogDebug($"Auto-login: email={savedEmail}, role={savedRole}");
@@ -119,11 +174,14 @@ public class StartupManager : MonoBehaviour
             
             LogDebug($"Auto-login: Will load scene {targetScene} for role {savedRole}");
             
+            // Step 5: Scene preparation
+            SetProgress(PROGRESS_SCENE_PREPARATION, "Preparing dashboard...");
+            
             // Wait for minimum loading time
             yield return WaitForMinimumLoadingTime();
             
-            // Load dashboard scene
-            UpdateLoadingText("Loading dashboard...");
+            // Step 6: Final loading
+            SetProgress(PROGRESS_COMPLETE, "Loading dashboard...");
             yield return new WaitForSeconds(0.5f);
             
             LogDebug($"Loading dashboard scene: {targetScene}");
@@ -133,7 +191,10 @@ public class StartupManager : MonoBehaviour
         {
             // Manual login required
             LogDebug("Manual login required");
-            UpdateLoadingText("Please sign in...");
+            
+            // Step 4: Scene preparation
+            SetProgress(PROGRESS_AUTO_LOGIN_SETUP, "Preparing sign-in...");
+            yield return new WaitForSeconds(0.5f);
             
             // Clear logout flag since we're going to login scene
             // This ensures clean state for the next login attempt
@@ -144,8 +205,15 @@ public class StartupManager : MonoBehaviour
                 LogDebug("Cleared logout flag - ready for fresh login");
             }
             
+            // Step 5: Scene preparation
+            SetProgress(PROGRESS_SCENE_PREPARATION, "Setting up login...");
+            
             // Wait for minimum loading time
             yield return WaitForMinimumLoadingTime();
+            
+            // Step 6: Final loading
+            SetProgress(PROGRESS_COMPLETE, "Please sign in...");
+            yield return new WaitForSeconds(0.3f);
             
             // Load login scene
             LogDebug($"Loading login scene: {loginSceneIndex}");
@@ -272,8 +340,6 @@ public class StartupManager : MonoBehaviour
     
     private void UpdateLoadingText(string message)
     {
-        LogDebug($"Loading: {message}");
-        
         if (loadingText != null)
         {
             loadingText.text = message;
@@ -286,6 +352,81 @@ public class StartupManager : MonoBehaviour
         {
             Debug.Log($"[STARTUP] {message}");
         }
+    }
+    
+    /// <summary>
+    /// Sets the target progress value and optionally updates the loading text
+    /// </summary>
+    private void SetProgress(float progress, string loadingMessage = null)
+    {
+        targetProgress = Mathf.Clamp01(progress);
+        
+        if (!string.IsNullOrEmpty(loadingMessage))
+        {
+            UpdateLoadingText(loadingMessage);
+        }
+        
+        if (smoothProgressAnimation)
+        {
+            // Start smooth animation to target progress
+            if (progressAnimationCoroutine != null)
+            {
+                StopCoroutine(progressAnimationCoroutine);
+            }
+            progressAnimationCoroutine = StartCoroutine(AnimateProgressToTarget());
+        }
+        else
+        {
+            // Immediate progress update
+            currentProgress = targetProgress;
+            UpdateProgressSlider();
+        }
+        
+        LogDebug($"Progress: {(targetProgress * 100):F0}% - {loadingMessage}");
+    }
+    
+    /// <summary>
+    /// Smoothly animates the progress bar to the target value
+    /// </summary>
+    private IEnumerator AnimateProgressToTarget()
+    {
+        while (Mathf.Abs(currentProgress - targetProgress) > 0.01f)
+        {
+            currentProgress = Mathf.MoveTowards(currentProgress, targetProgress, 
+                progressAnimationSpeed * Time.deltaTime);
+            UpdateProgressSlider();
+            yield return null;
+        }
+        
+        // Ensure we reach exactly the target
+        currentProgress = targetProgress;
+        UpdateProgressSlider();
+    }
+    
+    /// <summary>
+    /// Updates the visual progress slider
+    /// </summary>
+    private void UpdateProgressSlider()
+    {
+        if (progressSlider != null)
+        {
+            progressSlider.value = currentProgress;
+        }
+    }
+    
+    /// <summary>
+    /// Initializes the progress slider
+    /// </summary>
+    private void InitializeProgressSlider()
+    {
+        if (progressSlider != null)
+        {
+            progressSlider.minValue = 0f;
+            progressSlider.maxValue = 1f;
+            progressSlider.value = 0f;
+        }
+        currentProgress = 0f;
+        targetProgress = 0f;
     }
     
     // Context menu helpers for testing
@@ -307,5 +448,44 @@ public class StartupManager : MonoBehaviour
         PlayerPrefs.DeleteKey("SelectedCityId");
         PlayerPrefs.Save();
         Debug.Log("All login data cleared");
+    }
+    
+    [ContextMenu("Test Progress Animation")]
+    private void TestProgressAnimation()
+    {
+        if (Application.isPlaying)
+        {
+            StartCoroutine(TestProgressSequence());
+        }
+        else
+        {
+            Debug.Log("Progress animation test can only be run in Play mode");
+        }
+    }
+    
+    private IEnumerator TestProgressSequence()
+    {
+        Debug.Log("Testing progress animation sequence...");
+        InitializeProgressSlider();
+        
+        SetProgress(0f, "Starting test...");
+        yield return new WaitForSeconds(1f);
+        
+        SetProgress(PROGRESS_INITIALIZATION, "Initialization test...");
+        yield return new WaitForSeconds(1f);
+        
+        SetProgress(PROGRESS_LOGIN_CHECK, "Login check test...");
+        yield return new WaitForSeconds(1f);
+        
+        SetProgress(PROGRESS_AUTO_LOGIN_SETUP, "Auto-login setup test...");
+        yield return new WaitForSeconds(1f);
+        
+        SetProgress(PROGRESS_SCENE_PREPARATION, "Scene preparation test...");
+        yield return new WaitForSeconds(1f);
+        
+        SetProgress(PROGRESS_COMPLETE, "Complete!");
+        yield return new WaitForSeconds(1f);
+        
+        Debug.Log("Progress animation test completed");
     }
 } 
