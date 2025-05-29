@@ -38,6 +38,7 @@ public class PullToRefresh : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     private UIManager uiManager;
     private GoogleSheetsService sheetsService;
     private DataModelClasses dataModel;
+    private AchievementIntegration achievementIntegration;
     private string currentRefreshingCityId = ""; // Track which city we're refreshing
     
     // For debugging data synchronization issues
@@ -102,6 +103,15 @@ public class PullToRefresh : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             if (dataModel == null)
             {
                 LogWarning("DataModelClasses not found!");
+            }
+        }
+        
+        if (achievementIntegration == null)
+        {
+            achievementIntegration = FindObjectOfType<AchievementIntegration>();
+            if (achievementIntegration == null)
+            {
+                LogWarning("AchievementIntegration not found!");
             }
         }
     }
@@ -373,6 +383,13 @@ public class PullToRefresh : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             
             // Start the snap back animation
             StartCoroutine(ElasticSnapBack(true));
+            
+            // IMPORTANT: Notify achievement system about data refresh
+            if (achievementIntegration != null)
+            {
+                LogDebug("Notifying achievement system about data refresh");
+                achievementIntegration.OnManualDataRefresh();
+            }
             
             // CRITICAL: Reload the scene like city buttons do
             // This ensures a complete refresh with proper city context
