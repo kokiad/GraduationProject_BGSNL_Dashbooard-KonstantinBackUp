@@ -514,37 +514,31 @@ MonoBehaviour:
     statText: {fileID: 990737932}
     progressText: {fileID: 1931542817}
     normalColor: {r: 1, g: 1, b: 1, a: 0}
-    completedColor: {r: 1, g: 1, b: 1, a: 0}
   - achievementType: 1
     achievementObject: {fileID: 2116111643}
     statText: {fileID: 891563066}
     progressText: {fileID: 2077797295}
     normalColor: {r: 1, g: 1, b: 1, a: 0}
-    completedColor: {r: 1, g: 1, b: 1, a: 0}
   - achievementType: 2
     achievementObject: {fileID: 685330034}
     statText: {fileID: 1970513922}
     progressText: {fileID: 122006596}
     normalColor: {r: 1, g: 1, b: 1, a: 0}
-    completedColor: {r: 1, g: 1, b: 1, a: 0}
   - achievementType: 3
     achievementObject: {fileID: 330328367}
     statText: {fileID: 133465440}
     progressText: {fileID: 901617105}
     normalColor: {r: 1, g: 1, b: 1, a: 0}
-    completedColor: {r: 1, g: 1, b: 1, a: 0}
   - achievementType: 5
     achievementObject: {fileID: 1166408000}
     statText: {fileID: 397605789}
     progressText: {fileID: 1931640282}
     normalColor: {r: 1, g: 1, b: 1, a: 0}
-    completedColor: {r: 1, g: 1, b: 1, a: 0}
   - achievementType: 4
     achievementObject: {fileID: 359168218}
     statText: {fileID: 658509491}
     progressText: {fileID: 632812381}
     normalColor: {r: 1, g: 1, b: 1, a: 0}
-    completedColor: {r: 1, g: 1, b: 1, a: 0}
   trophyConfig:
     achievementTrophySets:
     - achievementType: 0
