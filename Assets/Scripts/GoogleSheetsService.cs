@@ -36,6 +36,9 @@ public class GoogleSheetsService : MonoBehaviour
         }
     }
     
+    // Add event for data updates
+    public static event Action OnDataUpdated;
+    
     private void Awake()
     {
         Debug.Log(@"GoogleSheetsService: Initializing
@@ -695,6 +698,9 @@ IMPORTANT SETUP INFORMATION:
         
         Debug.Log($"Processed {values.Count - 1} social media metrics entries, added {bestMetrics.Count} final metrics");
         Debug.Log("=== SOCIAL MEDIA PROCESSING COMPLETED ===");
+
+        // Notify listeners that data has been updated
+        OnDataUpdated?.Invoke();
     }
     
     /// <summary>
@@ -833,6 +839,9 @@ IMPORTANT SETUP INFORMATION:
         
         Debug.Log($"[CRITICAL] Processed {values.Count - 1} event metrics entries, added {bestMetrics.Count} final metrics");
         Debug.Log("=== EVENTS PROCESSING COMPLETED ===");
+
+        // Notify listeners that data has been updated
+        OnDataUpdated?.Invoke();
     }
     
     /// <summary>
