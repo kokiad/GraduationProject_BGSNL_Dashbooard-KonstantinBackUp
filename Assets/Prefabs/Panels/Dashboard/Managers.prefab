@@ -187,32 +187,32 @@ MonoBehaviour:
   ticketsSoldText: {fileID: 0}
   averageAttendanceText: {fileID: 0}
   numberOfEventsText: {fileID: 0}
-  bgsnlLogo: {fileID: 21300000, guid: 614f6984593eea741ad270607b27bcb2, type: 3}
+  bgsnlLogo: {fileID: 21300000, guid: 618912ba6d14055448921ed3275aedac, type: 3}
   cityConfigs:
   - cityId: bgsnl
     cityName: BGSNL
-    cityLogo: {fileID: 21300000, guid: 614f6984593eea741ad270607b27bcb2, type: 3}
+    cityLogo: {fileID: 21300000, guid: 618912ba6d14055448921ed3275aedac, type: 3}
   - cityId: bgsg
     cityName: BGSG
-    cityLogo: {fileID: 21300000, guid: c2a2fd7c3285d6c42865a3132c1887f4, type: 3}
+    cityLogo: {fileID: 21300000, guid: 6fa95572453cb634292d277f4486af99, type: 3}
   - cityId: bgsa
     cityName: BGSA
-    cityLogo: {fileID: 21300000, guid: acd147ba66fff28469860a6d054faa70, type: 3}
+    cityLogo: {fileID: 21300000, guid: 0707bccc184208847b735883a4b526e5, type: 3}
   - cityId: bgse
     cityName: BGSE
-    cityLogo: {fileID: 21300000, guid: 839daac8614b20546802f154dcc02108, type: 3}
+    cityLogo: {fileID: 21300000, guid: cb54679814600f64aae39444915c6e9b, type: 3}
   - cityId: bgsb
     cityName: BGSB
-    cityLogo: {fileID: 21300000, guid: 90797208399eaa647b23fd0ecf6b47f1, type: 3}
+    cityLogo: {fileID: 21300000, guid: 2bb704a247334f448a434dc032e20e0e, type: 3}
   - cityId: bgsl
     cityName: BGSL
-    cityLogo: {fileID: 21300000, guid: 9af7f4fb0726ecc4296dfed5fb299b1f, type: 3}
+    cityLogo: {fileID: 21300000, guid: f68a3681b0f046048b2d47d15a7494d9, type: 3}
   - cityId: bgsm
     cityName: BGSM
-    cityLogo: {fileID: 21300000, guid: 3dbdce41fbab87f4da9c15effaf1907b, type: 3}
+    cityLogo: {fileID: 21300000, guid: bcf5944ed857406499b0995a4e537d3f, type: 3}
   - cityId: bgsr
     cityName: BGSR
-    cityLogo: {fileID: 21300000, guid: 245d0914781105f4883714600c6e13f2, type: 3}
+    cityLogo: {fileID: 21300000, guid: daa741cb5f8a92b4fb006ee828630458, type: 3}
   mainSceneName: HomeScreen
   debugMode: 1
   forceDefaultCity: 1
@@ -272,6 +272,7 @@ MonoBehaviour:
   deleteDataButton: {fileID: 0}
   closePrivacyPolicyButton: {fileID: 0}
   closeViewMyDataButton: {fileID: 0}
+  viewMyDataButton: {fileID: 0}
   organizationName: BGSNL (Bulgarian Society Netherlands)
   contactEmail: info@bgsnl.nl
   debugMode: 1

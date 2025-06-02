@@ -1437,7 +1437,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6766748105275998458, guid: f7a69cb7d28e1a144a0845f8d31ce9a1, type: 3}
       propertyPath: m_text
-      value: BGSE
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 6776281927991618671, guid: f7a69cb7d28e1a144a0845f8d31ce9a1, type: 3}
       propertyPath: m_Pivot.y
