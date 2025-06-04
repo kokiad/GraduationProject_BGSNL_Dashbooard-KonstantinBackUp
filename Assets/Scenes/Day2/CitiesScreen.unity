@@ -859,6 +859,10 @@ PrefabInstance:
       propertyPath: buttonType
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 4520284915307983061, guid: 67ddb36b4e295fd4e9ce848350730dd5, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 5022833466448890515, guid: 67ddb36b4e295fd4e9ce848350730dd5, type: 3}
       propertyPath: buttonType
       value: 2
