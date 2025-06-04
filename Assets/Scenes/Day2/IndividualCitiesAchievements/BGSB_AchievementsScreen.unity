@@ -1687,10 +1687,10 @@ MonoBehaviour:
   achievementsParent: {fileID: 1863818340}
   debugMode: 1
   trophyWidth: 300
-  trophySpacing: 100
-  leftPadding: 100
-  rightPadding: 100
-  minContentWidth: 1440
+  trophySpacing: 75
+  leftPadding: 0
+  rightPadding: 0
+  minContentWidth: 1220
 --- !u!4 &1700387779
 Transform:
   m_ObjectHideFlags: 0
