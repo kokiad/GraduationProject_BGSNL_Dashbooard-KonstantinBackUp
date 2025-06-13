@@ -45,12 +45,9 @@ public class SocialMediaMetrics
 
     public void UpdateFromRawData(Dictionary<string, string> rawData)
     {
-        Debug.Log($"Updating SocialMediaMetrics from raw data: {string.Join(", ", rawData.Select(kv => $"{kv.Key}={kv.Value}"))}");
-        
         if (rawData.TryGetValue("instagram_followers", out string igFollowers))
         {
             instagramFollowers = igFollowers;
-            Debug.Log($"Set instagram_followers: {igFollowers}");
         }
         else
         {
@@ -61,7 +58,6 @@ public class SocialMediaMetrics
         if (rawData.TryGetValue("tiktok_followers", out string ttFollowers))
         {
             tikTokFollowers = ttFollowers;
-            Debug.Log($"Set tiktok_followers: {ttFollowers}");
         }
         else
         {
@@ -72,7 +68,6 @@ public class SocialMediaMetrics
         if (rawData.TryGetValue("tiktok_likes", out string ttLikes))
         {
             tikTokLikes = ttLikes;
-            Debug.Log($"Set tiktok_likes: {ttLikes}");
         }
         else
         {
@@ -85,18 +80,16 @@ public class SocialMediaMetrics
             if (DateTime.TryParse(timestampStr, out DateTime parsedTimestamp))
             {
                 timestamp = parsedTimestamp;
-                Debug.Log($"Parsed timestamp as date: {timestampStr} -> {timestamp}");
             }
             else
             {
                 timestamp = DateTime.Now;
-                Debug.Log($"Timestamp value '{timestampStr}' is not a valid date. Using current time: {timestamp}");
+                Debug.LogWarning($"Invalid timestamp format: {timestampStr}");
             }
         }
         else
         {
             timestamp = DateTime.Now;
-            Debug.Log("No timestamp field found. Using current time: " + timestamp);
         }
     }
 }

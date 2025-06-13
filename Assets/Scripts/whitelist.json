@@ -1,16 +1,40 @@
 {
   "whitelist": {
-    "k.sonev1@gmail.com": {
+    "graduationtesting,tech_AT_gmail,com": {
+      "email": "graduationtesting.tech@gmail.com",
       "role": "admin"
     },
-    "burronixsub@gmail.com": {
+    "graduationtesting,bgsnl_AT_gmail,com": {
+      "email": "graduationtesting.bgsnl@gmail.com", 
       "role": "bgsnl"
     },
-    "kokiadtheryzegod@gmail.com": {
-      "role": "bgse"
-    },
-    "sledrabota@gmail.com": {
+    "graduationtesting,bgsg_AT_gmail,com": {
+      "email": "graduationtesting.bgsg@gmail.com",
       "role": "bgsg"
+    },
+    "graduationtesting,bgsr_AT_gmail,com": {
+      "email": "graduationtesting.bgsr@gmail.com",
+      "role": "bgsr"
+    },
+    "graduationtesting,bgsl_AT_gmail,com": {
+      "email": "graduationtesting.bgsl@gmail.com",
+      "role": "bgsl"
+    },
+    "graduationtesting,bgsa_AT_gmail,com": {
+      "email": "graduationtesting.bgsa@gmail.com",
+      "role": "bgsa"
+    },
+    "graduationtesting,bgsb_AT_gmail,com": {
+      "email": "graduationtesting.bgsb@gmail.com",
+      "role": "bgsb"
+    },
+    "graduationtesting,bgsm_AT_gmail,com": {
+      "email": "graduationtesting.bgsm@gmail.com",
+      "role": "bgsm"
+    },
+    "graduationtesting,bgse_AT_gmail,com": {
+      "email": "graduationtesting.bgse@gmail.com",
+      "role": "bgse"
     }
   }
 }

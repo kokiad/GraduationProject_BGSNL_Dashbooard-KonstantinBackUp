@@ -540,10 +540,7 @@ public class AchievementSystem : MonoBehaviour
     
     private void LogDebug(string message)
     {
-        if (debugMode)
-        {
-            Debug.Log($"[AchievementSystem] {message}");
-        }
+        // Removed debug logging in production
     }
     
     // Context menu methods for testing
@@ -642,84 +639,15 @@ public class AchievementSystem : MonoBehaviour
     [ContextMenu("Force Regenerate Achievements with Current Inspector Values")]
     public void ForceRegenerateAchievements()
     {
-        LogDebug("=== FORCE REGENERATING ACHIEVEMENTS ===");
-        LogDebug($"useCustomMilestones is set to: {useCustomMilestones}");
-        
         if (!useCustomMilestones)
         {
-            LogDebug("WARNING: useCustomMilestones is FALSE - inspector values will be ignored!");
-            LogDebug("Set useCustomMilestones to TRUE to use inspector values");
+            Debug.LogWarning("useCustomMilestones is FALSE - inspector values will be ignored!");
+            return;
         }
         
-        // Log all current inspector values
-        LogDebug("Current inspector milestone arrays:");
-        LogDebug($"  Instagram Followers: [{string.Join(", ", instagramFollowersMilestones)}] (Count: {instagramFollowersMilestones.Length})");
-        LogDebug($"  TikTok Followers: [{string.Join(", ", tiktokFollowersMilestones)}] (Count: {tiktokFollowersMilestones.Length})");
-        LogDebug($"  TikTok Likes: [{string.Join(", ", tiktokLikesMilestones)}] (Count: {tiktokLikesMilestones.Length})");
-        LogDebug($"  Tickets Sold: [{string.Join(", ", ticketsSoldMilestones)}] (Count: {ticketsSoldMilestones.Length})");
-        LogDebug($"  Number of Events: [{string.Join(", ", numberOfEventsMilestones)}] (Count: {numberOfEventsMilestones.Length})");
-        LogDebug($"  Average Attendance: [{string.Join(", ", averageAttendanceMilestones)}] (Count: {averageAttendanceMilestones.Length})");
-        
-        // Calculate expected total
-        int expectedTotal = 0;
-        if (useCustomMilestones)
-        {
-            expectedTotal = instagramFollowersMilestones.Length + tiktokFollowersMilestones.Length + 
-                           tiktokLikesMilestones.Length + ticketsSoldMilestones.Length + 
-                           numberOfEventsMilestones.Length + averageAttendanceMilestones.Length;
-        }
-        else
-        {
-            foreach (var kvp in defaultMilestones)
-            {
-                expectedTotal += kvp.Value.Length;
-            }
-        }
-        LogDebug($"Expected total milestone count: {expectedTotal}");
-        
-        // Clear all existing achievement data
-        string currentCityId = PlayerPrefs.GetString("SelectedCityId", "bgsnl");
-        LogDebug($"Clearing achievement data for city: {currentCityId}");
-        
-        // Clear PlayerPrefs for all achievements
-        foreach (var achievementType in System.Enum.GetValues(typeof(AchievementType)).Cast<AchievementType>())
-        {
-            string achievementId = $"{currentCityId}_{achievementType}";
-            PlayerPrefs.DeleteKey(ACHIEVEMENTS_KEY + achievementId);
-            LogDebug($"Cleared achievement data for: {achievementId}");
-        }
-        
-        // Clear unlocked achievements
-        PlayerPrefs.DeleteKey(UNLOCKED_KEY + currentCityId);
-        LogDebug($"Cleared unlocked achievements for: {currentCityId}");
-        
-        // Clear any cached data
-        PlayerPrefs.Save();
-        
-        // Force recreation of achievements with current inspector values
-        LogDebug("Forcing recreation of achievements...");
-        
-        // Clear the in-memory cache first
-        currentCityAchievements.Clear();
-        
-        // Recreate achievements (this will use the updated titles from the dictionary)
-        LoadAchievementsForCity(currentCityId);
-        
-        // Force check achievement progress to ensure everything is up to date
+        // Regenerate achievements with current inspector values
+        InitializeCurrentCityAchievements();
         CheckAchievementProgress();
-        
-        // Save all updated achievements with new titles
-        foreach (var achievement in currentCityAchievements.Values)
-        {
-            SaveAchievement(achievement);
-        }
-        PlayerPrefs.Save();
-        
-        LogDebug("=== FORCE REGENERATION COMPLETE ===");
-        LogDebug("Trophy count should now reflect current inspector values");
-        LogDebug("Please refresh the achievement UI manually to see the updated count");
-        
-        // Note: User should manually refresh the achievement UI after this operation
     }
     
     [ContextMenu("Update Achievement Titles Only")]

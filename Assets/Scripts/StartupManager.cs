@@ -284,21 +284,16 @@ public class StartupManager : MonoBehaviour
     private int DetermineSceneForRole(string role)
     {
         string normalizedRole = role.ToLower().Trim();
-        LogDebug($"Looking up scene for role: '{normalizedRole}'");
         
-        // Search through configured mappings
         foreach (var mapping in roleSceneMappings)
         {
             if (!string.IsNullOrEmpty(mapping.roleName) && 
                 mapping.roleName.ToLower().Trim() == normalizedRole)
             {
-                LogDebug($"Found mapping: {normalizedRole} -> Scene {mapping.sceneIndex}");
                 return mapping.sceneIndex;
             }
         }
         
-        // If no mapping found, use default
-        LogDebug($"No mapping found for role '{normalizedRole}', using default scene {defaultDashboardScene}");
         return defaultDashboardScene;
     }
     
@@ -307,7 +302,6 @@ public class StartupManager : MonoBehaviour
         if (string.IsNullOrEmpty(email))
             return "User";
             
-        // Extract name part before @ symbol
         int atIndex = email.IndexOf('@');
         if (atIndex > 0)
         {
@@ -324,7 +318,6 @@ public class StartupManager : MonoBehaviour
         
         if (remainingTime > 0)
         {
-            LogDebug($"Waiting {remainingTime:F1}s more for minimum loading time");
             yield return new WaitForSeconds(remainingTime);
         }
     }
@@ -348,15 +341,12 @@ public class StartupManager : MonoBehaviour
     
     private void LogDebug(string message)
     {
-        if (debugMode)
-        {
-            Debug.Log($"[STARTUP] {message}");
-        }
+        // Removed debug logging in production
     }
     
-    /// <summary>
-    /// Sets the target progress value and optionally updates the loading text
-    /// </summary>
+    
+    // Sets the target progress value and optionally updates the loading text
+    
     private void SetProgress(float progress, string loadingMessage = null)
     {
         targetProgress = Mathf.Clamp01(progress);
@@ -385,9 +375,9 @@ public class StartupManager : MonoBehaviour
         LogDebug($"Progress: {(targetProgress * 100):F0}% - {loadingMessage}");
     }
     
-    /// <summary>
-    /// Smoothly animates the progress bar to the target value
-    /// </summary>
+    
+    // Smoothly animates the progress bar to the target value
+    
     private IEnumerator AnimateProgressToTarget()
     {
         while (Mathf.Abs(currentProgress - targetProgress) > 0.01f)
@@ -403,9 +393,9 @@ public class StartupManager : MonoBehaviour
         UpdateProgressSlider();
     }
     
-    /// <summary>
-    /// Updates the visual progress slider
-    /// </summary>
+    
+    // Updates the visual progress slider
+    
     private void UpdateProgressSlider()
     {
         if (progressSlider != null)
@@ -414,9 +404,9 @@ public class StartupManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Initializes the progress slider
-    /// </summary>
+    
+    // Initializes the progress slider
+    
     private void InitializeProgressSlider()
     {
         if (progressSlider != null)

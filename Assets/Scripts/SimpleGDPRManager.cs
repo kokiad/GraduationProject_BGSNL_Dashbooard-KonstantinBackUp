@@ -473,10 +473,7 @@ This privacy policy is designed to be transparent and understandable. If you hav
 
     private void LogDebug(string message)
     {
-        if (debugMode)
-        {
-            Debug.Log($"[SimpleGDPR] {message}");
-        }
+        // Removed debug logging in production
     }
 
     // Context menu helpers for testing
@@ -516,25 +513,19 @@ This privacy policy is designed to be transparent and understandable. If you hav
     /// </summary>
     public void ViewMyData()
     {
-        LogDebug("User requested to view their personal data");
-        
-        HideAllPanels(); // Close any other open panels
+        HideAllPanels();
         
         if (viewMyDataPanel != null)
         {
-            // Update the text with user's data
             if (viewMyDataText != null)
             {
                 viewMyDataText.text = GetUserDataSummary();
             }
             
-            // Show the panel
             viewMyDataPanel.SetActive(true);
-            LogDebug("Showing view my data panel");
         }
         else
         {
-            LogDebug("View My Data panel not assigned - logging data instead");
             string userData = GetUserDataSummary();
             Debug.Log($"[Your Personal Data]\n{userData}");
         }
@@ -542,8 +533,6 @@ This privacy policy is designed to be transparent and understandable. If you hav
 
     public void HideViewMyData()
     {
-        LogDebug("Hiding view my data panel");
-        
         if (viewMyDataPanel != null)
         {
             viewMyDataPanel.SetActive(false);

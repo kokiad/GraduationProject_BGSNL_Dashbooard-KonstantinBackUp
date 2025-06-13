@@ -262,7 +262,6 @@ public class AchievementUI : MonoBehaviour
             {
                 int currentValue = GetCurrentValueForAchievement(achievement);
                 uiElement.UpdateDisplay(achievement, currentValue);
-                LogDebug($"Updated {achievement.type}: {currentValue}/{achievement.GetCurrentTarget()}");
             }
         }
         
@@ -310,86 +309,48 @@ public class AchievementUI : MonoBehaviour
     {
         if (trophyConfig == null || trophyConfig.trophyContainer == null) return;
         
-        LogDebug($"=== TROPHY DISPLAY DEBUG ===");
-        LogDebug($"Received {unlockedAchievements.Count} unlocked achievements");
-        
         // Clear existing trophies
         foreach (var trophy in currentTrophyObjects)
         {
             if (trophy != null) Destroy(trophy);
         }
         currentTrophyObjects.Clear();
-        LogDebug($"Cleared existing trophies, currentTrophyObjects.Count: {currentTrophyObjects.Count}");
         
         int trophiesCreated = 0;
         
         // Create trophies for unlocked achievements
         foreach (var unlockedAchievement in unlockedAchievements.OrderBy(ua => ua.unlockDate))
         {
-            LogDebug($"Processing unlocked achievement: {unlockedAchievement.achievementId} milestone {unlockedAchievement.milestoneLevel}");
-            
-            // Extract achievement type from achievementId (e.g., "bgsa_InstagramFollowers" -> InstagramFollowers)
             AchievementType achievementType = ExtractAchievementTypeFromId(unlockedAchievement.achievementId);
             
-            // Get trophy set for this achievement type
             AchievementTrophySet trophySet = trophyConfig.GetTrophySet(achievementType);
-            if (trophySet == null)
-            {
-                LogDebug($"❌ No trophy set found for achievement type: {achievementType}");
-                continue;
-            }
+            if (trophySet == null) continue;
             
-            // Get trophy prefab for this achievement type and milestone level
             GameObject trophyPrefab = trophySet.GetTrophyPrefab(unlockedAchievement.milestoneLevel);
-            if (trophyPrefab == null)
-            {
-                LogDebug($"❌ No trophy prefab found for {achievementType} milestone {unlockedAchievement.milestoneLevel}");
-                continue;
-            }
+            if (trophyPrefab == null) continue;
             
-            // Instantiate the trophy
             GameObject trophyInstance = Instantiate(trophyPrefab, trophyConfig.trophyContainer);
             currentTrophyObjects.Add(trophyInstance);
             trophiesCreated++;
             
-            LogDebug($"✅ Successfully created trophy {trophiesCreated} for {achievementType} milestone {unlockedAchievement.milestoneLevel}");
-            
-            // Only modify trophy text if explicitly requested
             if (trophySet.modifyTrophyText)
             {
                 var textComponents = trophyInstance.GetComponentsInChildren<TextMeshProUGUI>();
                 if (textComponents.Length > 0)
                 {
                     string trophyName = trophySet.GetMilestoneName(unlockedAchievement.milestoneLevel);
-                    textComponents[0].text = trophyName; // Set first text component
-                    LogDebug($"Set trophy text to: {trophyName} (because modifyTrophyText = true)");
+                    textComponents[0].text = trophyName;
                 }
             }
-            else
-            {
-                LogDebug($"Keeping original trophy text (modifyTrophyText = false)");
-            }
-            
-            LogDebug($"Created trophy for {achievementType} milestone {unlockedAchievement.milestoneLevel}");
         }
         
-        LogDebug($"Trophy creation complete: {trophiesCreated} trophies created");
-        LogDebug($"currentTrophyObjects.Count after creation: {currentTrophyObjects.Count}");
-        
-        // Fix content position if needed
         if (!contentPositionFixed && trophyConfig.trophyContainer != null)
         {
             StartCoroutine(FixContentPositionOnce());
         }
         
-        // Update trophy count display
         UpdateTrophyCount(currentTrophyObjects.Count);
-        
-        // Dynamically resize content based on trophy count
         ResizeContentForTrophyCount(currentTrophyObjects.Count);
-        
-        LogDebug($"Final trophy display count: {currentTrophyObjects.Count}");
-        LogDebug($"=== END TROPHY DISPLAY DEBUG ===");
     }
     
     private System.Collections.IEnumerator FixContentPositionOnce()
@@ -437,24 +398,10 @@ public class AchievementUI : MonoBehaviour
     
     private void UpdateTrophyCount(int count)
     {
-        LogDebug($"=== UpdateTrophyCount CALLED ===");
-        LogDebug($"Parameter 'count' received: {count}");
-        LogDebug($"currentTrophyObjects.Count at time of call: {currentTrophyObjects.Count}");
-        
         if (trophyCountText != null)
         {
-            // Calculate total possible trophies across all achievement types
             int totalPossibleTrophies = CalculateTotalPossibleTrophies();
-            
-            // Display as "current/total" format
             trophyCountText.text = $"{count}/{totalPossibleTrophies}";
-            
-            LogDebug($"=== TROPHY COUNT DEBUG ===");
-            LogDebug($"Current trophies displayed: {count}");
-            LogDebug($"currentTrophyObjects.Count: {currentTrophyObjects.Count}");
-            LogDebug($"Total possible trophies: {totalPossibleTrophies}");
-            LogDebug($"Final display: {count}/{totalPossibleTrophies}");
-            LogDebug($"=== END TROPHY COUNT DEBUG ===");
         }
     }
     
@@ -554,10 +501,7 @@ public class AchievementUI : MonoBehaviour
     
     private void LogDebug(string message)
     {
-        if (debugMode)
-        {
-            Debug.Log($"[AchievementUI] {message}");
-        }
+        // Removed debug logging in production
     }
     
     public void RefreshDisplay()
@@ -611,24 +555,16 @@ public class AchievementUI : MonoBehaviour
         
         if (trophyCount == 0)
         {
-            // Use minimum width when no trophies
             contentWidth = minContentWidth;
         }
         else
         {
-            // Calculate width based on trophy count
-            // Formula: leftPadding + (trophyCount * trophyWidth) + ((trophyCount - 1) * trophySpacing) + rightPadding
-            // This accounts for: left padding + all trophy widths + spacing between trophies + right padding
             contentWidth = leftPadding + (trophyCount * trophyWidth) + ((trophyCount - 1) * trophySpacing) + rightPadding;
         }
         
-        // Set the content width
         RectTransform contentRect = trophyConfig.trophyContainer;
         Vector2 sizeDelta = contentRect.sizeDelta;
         sizeDelta.x = contentWidth;
         contentRect.sizeDelta = sizeDelta;
-        
-        LogDebug($"Resized content width to {contentWidth} for {trophyCount} trophies " +
-                $"(trophy: {trophyWidth}, spacing: {trophySpacing}, left: {leftPadding}, right: {rightPadding})");
     }
 } 

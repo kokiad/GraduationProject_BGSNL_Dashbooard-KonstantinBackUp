@@ -1276,9 +1276,9 @@ public class GoogleSheetsResponse
 // 2. Enable Google Sheets API
 // 3. Create API Key in Credentials
 // 4. Set the API Key in the inspector
-// 5. Make your Google Sheet public or share it with appropriate permissions
+// 5. Make the Google Sheet public 
 // 6. Get the Spreadsheet ID from the URL (between /d/ and /edit)
 // 7. Set up two sheets: "SocialMedia" and "Events" with appropriate headers
-//    - SocialMedia headers: city_id, instagram_followers, tiktok_followers, tiktok_likes, timestamp
-//    - Events headers: city_id, tickets_sold, average_attendance, number_of_events, timestamp
+//    - SocialMedia headers: city_id, instagram_followers, tiktok_followers, tiktok_likes, timestamp (I do not use this, but you can if you want)
+//    - Events headers: city_id, tickets_sold, average_attendance, number_of_events, timestamp (I do not use this, but you can if you want)
 

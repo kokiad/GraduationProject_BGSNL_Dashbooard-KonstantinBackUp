@@ -278,9 +278,9 @@ public class AchievementIntegration : MonoBehaviour
         // NotificationManager.ShowAchievementNotification(achievement, milestoneLevel);
     }
     
-    /// <summary>
-    /// Call this method when the user manually refreshes data (e.g., pull-to-refresh)
-    /// </summary>
+    
+    // Call this method when the user manually refreshes data (e.g., pull-to-refresh)
+    
     public void OnManualDataRefresh()
     {
         LogDebug("Manual data refresh triggered, checking achievements");
@@ -299,10 +299,10 @@ public class AchievementIntegration : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Public method to manually trigger achievement check
-    /// Can be called from UI buttons or other scripts
-    /// </summary>
+    
+    // Public method to manually trigger achievement check
+    // Can be called from UI buttons or other scripts
+    
     public void CheckAchievements()
     {
         if (achievementSystem != null)
@@ -316,9 +316,9 @@ public class AchievementIntegration : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Force refresh both achievements and UI
-    /// </summary>
+    
+    // Force refresh both achievements and UI
+    
     public void ForceRefreshAchievements()
     {
         LogDebug("Force refreshing achievements");

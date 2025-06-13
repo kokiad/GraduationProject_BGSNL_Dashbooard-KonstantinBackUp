@@ -109,15 +109,12 @@ public class UIManager : MonoBehaviour
     
     private void LogDebug(string message)
     {
-        if (debugMode)
-        {
-            Debug.Log(message);
-        }
+        // Removed debug logging in production
     }
     
     private void LogError(string message)
     {
-        Debug.LogError(message); // Always log errors
+        Debug.LogError(message); // Keep error logging
     }
     
     private void FindDataReferences()
@@ -129,10 +126,6 @@ public class UIManager : MonoBehaviour
             {
                 LogError("[UIManager] Could not find DataModelClasses!");
             }
-            else
-            {
-                LogDebug("[UIManager] Found DataModelClasses reference.");
-            }
         }
         
         if (sheetsService == null)
@@ -141,10 +134,6 @@ public class UIManager : MonoBehaviour
             if (sheetsService == null)
             {
                 LogError("[UIManager] Could not find GoogleSheetsService!");
-            }
-            else
-            {
-                LogDebug("[UIManager] Found GoogleSheetsService reference.");
             }
         }
     }
@@ -178,26 +167,9 @@ public class UIManager : MonoBehaviour
         }
         
         LogDebug($"[UIManager] Current city ID set to: '{currentCityId}'");
-        DebugDumpCityConfigs();
         
         // Wait longer for the data to fully load
         StartCoroutine(WaitAndUpdateDashboard());
-    }
-    
-    private void DebugDumpCityConfigs()
-    {
-        if (!debugMode) return;
-        
-        Debug.Log("======== CITY CONFIGS DUMP ========");
-        Debug.Log($"BGSNL Logo assigned: {bgsnlLogo != null}");
-        Debug.Log($"Number of city configs: {cityConfigs.Count}");
-        
-        foreach (var city in cityConfigs)
-        {
-            Debug.Log($"City: ID='{city.cityId}', Name='{city.cityName}', Logo={city.cityLogo != null}");
-        }
-        
-        Debug.Log("===================================");
     }
     
     private bool IsCityValid(string cityId)
@@ -257,9 +229,9 @@ public class UIManager : MonoBehaviour
         UpdateDashboard();
     }
     
-    /// <summary>
-    /// Updates the dashboard UI with metrics for the currently selected city
-    /// </summary>
+    
+    // Updates the dashboard UI with metrics for the currently selected city
+    
     public void UpdateDashboard()
     {
         if (!isInitialized)
@@ -270,11 +242,9 @@ public class UIManager : MonoBehaviour
         
         if (SceneManager.GetActiveScene().name != mainSceneName)
         {
-            LogDebug($"[UIManager] Not in main scene ({mainSceneName}), skipping dashboard update.");
             return;
         }
         
-        // Find UI references if needed
         FindUIReferences();
         
         if (dataModel == null)
@@ -283,101 +253,33 @@ public class UIManager : MonoBehaviour
             return;
         }
         
-        LogDebug($"[UIManager] Beginning dashboard update for city ID: '{currentCityId}'");
-        LogDebug($"[UIManager] UI References - Logo: {(logoImage != null ? "Found" : "Missing")}, " +
-                 $"Instagram: {(instagramFollowersText != null ? "Found" : "Missing")}, " +
-                 $"TikTok: {(tiktokFollowersText != null ? "Found" : "Missing")}, " + 
-                 $"TikTok Likes: {(tiktokLikesText != null ? "Found" : "Missing")}, " +
-                 $"Tickets: {(ticketsSoldText != null ? "Found" : "Missing")}, " +
-                 $"Attendance: {(averageAttendanceText != null ? "Found" : "Missing")}, " +
-                 $"Events: {(numberOfEventsText != null ? "Found" : "Missing")}");
-        
-        // Update the logo based on selected city
         UpdateLogo(currentCityId);
         
-        // Get the city by ID
         City selectedCity = dataModel.GetCityById(currentCityId);
         if (selectedCity == null)
         {
-            LogDebug($"[UIManager] City with ID '{currentCityId}' not found, checking if we need to create it");
-            
-            // Check if we should create a city for this ID
-            if (currentCityId.ToLower() == "bgsnl")
-            {
-                selectedCity = new City("BGSNL", "bgsnl");
-                dataModel.AddCity(selectedCity);
-                LogDebug("[UIManager] Created BGSNL city in data model");
-            }
-            else 
-            {
-                // Look in our city configs for a matching city ID
-                foreach (var cityConfig in cityConfigs)
-                {
-                    if (cityConfig.cityId.ToLower() == currentCityId.ToLower())
-                    {
-                        string cityName = !string.IsNullOrEmpty(cityConfig.cityName) ? 
-                            cityConfig.cityName : cityConfig.cityId.ToUpper();
-                        
-                        selectedCity = new City(cityName, cityConfig.cityId.ToLower());
-                        dataModel.AddCity(selectedCity);
-                        LogDebug($"[UIManager] Created city in data model: {cityName} (ID: {cityConfig.cityId.ToLower()})");
-                        break;
-                    }
-                }
-            }
-            
-            // If still not found, fall back to first city
-            if (selectedCity == null)
-            {
-                if (dataModel.Cities.Count > 0)
-                {
-                    selectedCity = dataModel.Cities[0];
-                    currentCityId = selectedCity.ID;
-                    LogDebug($"[UIManager] Falling back to first city: {selectedCity.Name} (ID: {selectedCity.ID})");
-                }
-                else
-                {
-                    LogError("[UIManager] No cities found in DataModelClasses and couldn't create one");
+            LogError($"[UIManager] Could not find city with ID: {currentCityId}");
             return;
-                }
-            }
         }
         
         string cityId = selectedCity.ID;
-        LogDebug($"[UIManager] Looking for metrics for city: {selectedCity.Name} (ID: {cityId})");
         
-        // Check that there's actual data in the model
         if (dataModel.SocialMediaMetrics.Count == 0 && dataModel.EventMetrics.Count == 0)
         {
             LogError("[UIManager] No metrics data found in the model! Try forcing a refresh.");
             if (sheetsService != null)
             {
-                LogDebug("[UIManager] Attempting to force refresh data...");
                 sheetsService.ForceRefresh();
-                
-                // Add a small delay to let data load
                 StartCoroutine(DelayedRetryUpdateDashboard(1.0f));
                 return;
             }
         }
         
-        // Dump all metrics data for debugging
-        if (debugMode)
-        {
-            DumpMetricsData();
-        }
-        
-        // Get metrics for selected city
         SocialMediaMetrics socialMetrics = dataModel.GetLatestSocialMediaMetrics(cityId);
         EventMetrics eventMetrics = dataModel.GetLatestEventMetrics(cityId);
         
-        // Update social media metrics
         UpdateSocialMediaMetrics(socialMetrics, selectedCity);
-        
-        // Update event metrics
         UpdateEventMetrics(eventMetrics, selectedCity);
-        
-        LogDebug("[UIManager] Dashboard update complete.");
     }
     
     private IEnumerator DelayedRetryUpdateDashboard(float delay)
@@ -387,39 +289,13 @@ public class UIManager : MonoBehaviour
         UpdateDashboard();
     }
     
-    private void DumpMetricsData()
-    {
-        Debug.Log("======== METRICS DATA DUMP ========");
-        Debug.Log($"City count: {dataModel.Cities.Count}");
-        foreach (var city in dataModel.Cities)
-        {
-            Debug.Log($"City: {city.Name} (ID: {city.ID})");
-        }
-        
-        Debug.Log($"Social media metrics count: {dataModel.SocialMediaMetrics.Count}");
-        foreach (var metric in dataModel.SocialMediaMetrics)
-        {
-            Debug.Log($"Social metrics for {metric.AssociatedCity.Name}: Instagram={metric.InstagramFollowers}, TikTok={metric.TikTokFollowers}, Likes={metric.TikTokLikes}");
-        }
-        
-        Debug.Log($"Event metrics count: {dataModel.EventMetrics.Count}");
-        foreach (var metric in dataModel.EventMetrics)
-        {
-            Debug.Log($"Event metrics for {metric.AssociatedCity.Name}: Tickets={metric.TicketsSold}, Attendance={metric.AverageAttendance}, Events={metric.NumberOfEvents}");
-        }
-        Debug.Log("===================================");
-    }
-    
     private void UpdateSocialMediaMetrics(SocialMediaMetrics socialMetrics, City selectedCity)
     {
         if (socialMetrics != null)
         {
-            LogDebug($"[UIManager] Found social media metrics for {selectedCity.Name}: Instagram={socialMetrics.InstagramFollowers}, TikTok={socialMetrics.TikTokFollowers}, Likes={socialMetrics.TikTokLikes}");
-            
             if (instagramFollowersText != null)
             {
                 instagramFollowersText.text = socialMetrics.InstagramFollowers;
-                LogDebug($"[UIManager] Set Instagram followers text to: {instagramFollowersText.text}");
             }
             else
             {
@@ -429,7 +305,6 @@ public class UIManager : MonoBehaviour
             if (tiktokFollowersText != null)
             {
                 tiktokFollowersText.text = socialMetrics.TikTokFollowers;
-                LogDebug($"[UIManager] Set TikTok followers text to: {tiktokFollowersText.text}");
             }
             else
             {
@@ -439,7 +314,6 @@ public class UIManager : MonoBehaviour
             if (tiktokLikesText != null)
             {
                 tiktokLikesText.text = socialMetrics.TikTokLikes;
-                LogDebug($"[UIManager] Set TikTok likes text to: {tiktokLikesText.text}");
             }
             else
             {
@@ -448,9 +322,6 @@ public class UIManager : MonoBehaviour
         }
         else
         {
-            LogDebug($"[UIManager] No social media metrics found for {selectedCity.Name} (ID: {selectedCity.ID})");
-            
-            // Set default values
             if (instagramFollowersText != null) instagramFollowersText.text = "0";
             if (tiktokFollowersText != null) tiktokFollowersText.text = "0";
             if (tiktokLikesText != null) tiktokLikesText.text = "0";
@@ -461,12 +332,9 @@ public class UIManager : MonoBehaviour
     {
         if (eventMetrics != null)
         {
-            LogDebug($"[UIManager] Found event metrics for {selectedCity.Name}: Tickets={eventMetrics.TicketsSold}, Attendance={eventMetrics.AverageAttendance}, Events={eventMetrics.NumberOfEvents}");
-            
             if (ticketsSoldText != null)
             {
                 ticketsSoldText.text = eventMetrics.TicketsSold;
-                LogDebug($"[UIManager] Set tickets sold text to: {ticketsSoldText.text}");
             }
             else
             {
@@ -476,7 +344,6 @@ public class UIManager : MonoBehaviour
             if (averageAttendanceText != null)
             {
                 averageAttendanceText.text = eventMetrics.AverageAttendance;
-                LogDebug($"[UIManager] Set average attendance text to: {averageAttendanceText.text}");
             }
             else
             {
@@ -486,7 +353,6 @@ public class UIManager : MonoBehaviour
             if (numberOfEventsText != null)
             {
                 numberOfEventsText.text = eventMetrics.NumberOfEvents;
-                LogDebug($"[UIManager] Set number of events text to: {numberOfEventsText.text}");
             }
             else
             {
@@ -495,9 +361,6 @@ public class UIManager : MonoBehaviour
         }
         else
         {
-            LogDebug($"[UIManager] No event metrics found for {selectedCity.Name} (ID: {selectedCity.ID})");
-            
-            // Set default values
             if (ticketsSoldText != null) ticketsSoldText.text = "0";
             if (averageAttendanceText != null) averageAttendanceText.text = "0";
             if (numberOfEventsText != null) numberOfEventsText.text = "0";
@@ -512,20 +375,14 @@ public class UIManager : MonoBehaviour
             return;
         }
         
-        // Default to BGSNL logo
         Sprite logoToUse = bgsnlLogo;
         bool foundCustomLogo = false;
         
-        // Print all cityConfigs for debugging
-        LogDebug($"[UIManager] Updating logo for city: '{cityId}'");
-        
-        // BGSNL special case - always use bgsnlLogo
         if (cityId.ToLower() == "bgsnl" || cityId.ToLower() == "admin")
         {
             if (bgsnlLogo != null)
             {
                 logoToUse = bgsnlLogo;
-                LogDebug($"[UIManager] Using BGSNL logo from bgsnlLogo field: {bgsnlLogo.name}");
                 foundCustomLogo = true;
             }
             else
@@ -545,7 +402,6 @@ public class UIManager : MonoBehaviour
                     if (cityConfig.cityLogo != null)
                     {
                         logoToUse = cityConfig.cityLogo;
-                        LogDebug($"[UIManager] Found custom logo '{cityConfig.cityLogo.name}' for city: '{cityId}'");
                         foundCustomLogo = true;
                         break;
                     }
@@ -577,7 +433,6 @@ public class UIManager : MonoBehaviour
         if (logoToUse != null)
         {
             logoImage.sprite = logoToUse;
-            LogDebug($"[UIManager] Updated logo for '{cityId}' to '{logoToUse.name}'");
         }
         else
         {
@@ -591,9 +446,9 @@ public class UIManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Forces a refresh of the dashboard with current city data
-    /// </summary>
+    
+    // Forces a refresh of the dashboard with current city data
+    
     public void RefreshDashboard()
     {
         LogDebug("[UIManager] Manually refreshing dashboard...");
@@ -620,9 +475,9 @@ public class UIManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Refreshes the dashboard with a specific city ID
-    /// </summary>
+    
+    // Refreshes the dashboard with a specific city ID
+    
     public IEnumerator RefreshWithSpecificCity(string cityId)
     {
         // Wait for data refresh to complete
@@ -641,9 +496,9 @@ public class UIManager : MonoBehaviour
         UpdateDashboard();
     }
     
-    /// <summary>
-    /// Load city data for the specified city ID
-    /// </summary>
+    
+    // Load city data for the specified city ID
+    
     public void LoadCity(string cityId)
     {
         if (string.IsNullOrEmpty(cityId))
@@ -705,9 +560,9 @@ public class UIManager : MonoBehaviour
         UpdateDashboard();
     }
     
-    /// <summary>
-    /// Called when the scene changes to set up UI elements
-    /// </summary>
+    
+    // Called when the scene changes to set up UI elements
+    
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -804,8 +659,8 @@ public class UIManager : MonoBehaviour
                     // Also set current city directly
                     currentCityId = preservedCity;
                     
-                    // IMPORTANT: Do not clear the backup key yet - we'll keep it until the dashboard is updated
-                    // This ensures if there are any late resets, our backup is still there
+                    // IMPORTANT: Do not clear the backup key yet - it's kept until it updates the dashboard
+                    // This ensures if there are any late resets, the backup is still there
                 }
             }
             
@@ -952,9 +807,9 @@ public class UIManager : MonoBehaviour
                  $"Events: {(numberOfEventsText != null)}");
     }
     
-    /// <summary>
-    /// Reset to BGSNL when the application quits to ensure it starts with BGSNL next time
-    /// </summary>
+    
+    // Reset to BGSNL when the application quits to ensure it starts with BGSNL next time
+    
     private void OnApplicationQuit()
     {
         // Force default city on next startup

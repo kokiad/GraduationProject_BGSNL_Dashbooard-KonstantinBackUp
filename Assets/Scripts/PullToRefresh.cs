@@ -118,10 +118,7 @@ public class PullToRefresh : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     
     private void LogDebug(string message)
     {
-        if (debugMode)
-        {
-            Debug.Log($"[PullToRefresh] {message}");
-        }
+        // Removed debug logging in production
     }
     
     private void LogWarning(string message)
@@ -136,62 +133,7 @@ public class PullToRefresh : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     
     private void LogDataState()
     {
-        if (!debugMode || dataModel == null) return;
-        
-        LogDebug("CURRENT DATA STATE:");
-        
-        // Log cities
-        LogDebug($"  Cities: {dataModel.Cities.Count}");
-        foreach (var city in dataModel.Cities)
-        {
-            LogDebug($"  - {city.Name} (ID: {city.ID})");
-        }
-        
-        // Log social media metrics
-        if (dataModel.SocialMediaMetrics.Count > 0)
-        {
-            LogDebug($"  Social Media Metrics: {dataModel.SocialMediaMetrics.Count}");
-            foreach (var metric in dataModel.SocialMediaMetrics)
-            {
-                if (metric.AssociatedCity != null)
-                {
-                    LogDebug($"  - {metric.AssociatedCity.Name}: Instagram={metric.InstagramFollowers}, " +
-                            $"TikTok={metric.TikTokFollowers}, Likes={metric.TikTokLikes}, " +
-                            $"Time={metric.Timestamp}");
-                }
-                else
-                {
-                    LogDebug("  - INVALID METRIC: Associated city is null!");
-                }
-            }
-        }
-        else
-        {
-            LogDebug("  No social media metrics available!");
-        }
-        
-        // Log event metrics
-        if (dataModel.EventMetrics.Count > 0)
-        {
-            LogDebug($"  Event Metrics: {dataModel.EventMetrics.Count}");
-            foreach (var metric in dataModel.EventMetrics)
-            {
-                if (metric.AssociatedCity != null)
-                {
-                    LogDebug($"  - {metric.AssociatedCity.Name}: Tickets={metric.TicketsSold}, " +
-                            $"Attendance={metric.AverageAttendance}, Events={metric.NumberOfEvents}, " +
-                            $"Time={metric.Timestamp}");
-                }
-                else
-                {
-                    LogDebug("  - INVALID METRIC: Associated city is null!");
-                }
-            }
-        }
-        else
-        {
-            LogDebug("  No event metrics available!");
-        }
+        // Removed debug data state logging
     }
     
     private void Start()

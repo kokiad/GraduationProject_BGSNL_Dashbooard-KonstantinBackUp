@@ -65,36 +65,14 @@ public class LoginWithGoogle : MonoBehaviour
         {"sledrabota@gmail.com", "bgsg"}
     };
 
-    private string debugLog = "";
-    private int maxDebugLines = 20;
-
     private void UpdateDebugText(string message)
     {
         Debug.Log($"[LOGIN] {message}");
-        
-        if (debugText != null)
-        {
-            // Add timestamp and new message
-            debugLog += $"[{System.DateTime.Now:HH:mm:ss}] {message}\n";
-            
-            // Keep only the last maxDebugLines
-            string[] lines = debugLog.Split('\n');
-            if (lines.Length > maxDebugLines)
-            {
-                debugLog = string.Join("\n", lines, lines.Length - maxDebugLines, maxDebugLines);
-            }
-
-            debugText.text = debugLog;
-        }
     }
 
     private void ClearDebugText()
     {
-        debugLog = "";
-        if (debugText != null)
-        {
-            debugText.text = "";
-        }
+        // Removed debug text clearing
     }
 
     private void Awake()
@@ -1013,30 +991,14 @@ public class LoginWithGoogle : MonoBehaviour
 
     public void ClearDebugLog()
     {
-        ClearDebugText();
-        UpdateDebugText("Debug log cleared - ready for testing");
+        // Removed debug log clearing
     }
 
     // Debug methods to help troubleshoot auto-login
     [ContextMenu("Debug Simple Auto-Login State")]
     public void DebugSimpleAutoLoginState()
     {
-        Debug.Log("=== SIMPLE AUTO-LOGIN DEBUG ===");
-        Debug.Log($"ManualLoginSuccess: {PlayerPrefs.HasKey(PREF_MANUAL_LOGIN_SUCCESS)}");
-        Debug.Log($"SavedUserEmail: '{PlayerPrefs.GetString(PREF_SAVED_USER_EMAIL, "NOT SET")}'");
-        Debug.Log($"SavedUserRole: '{PlayerPrefs.GetString(PREF_SAVED_USER_ROLE, "NOT SET")}'");
-        Debug.Log($"UserLoggedOut: {PlayerPrefs.HasKey(PREF_USER_LOGGED_OUT)}");
-        Debug.Log($"HasLaunchedBefore: {PlayerPrefs.HasKey("HasLaunchedBefore")}");
-        Debug.Log($"isFirstLaunch: {isFirstLaunch}");
-        
-        bool wouldAutoLogin = PlayerPrefs.HasKey(PREF_MANUAL_LOGIN_SUCCESS) && 
-                             !string.IsNullOrEmpty(PlayerPrefs.GetString(PREF_SAVED_USER_EMAIL, "")) &&
-                             !string.IsNullOrEmpty(PlayerPrefs.GetString(PREF_SAVED_USER_ROLE, "")) &&
-                             !PlayerPrefs.HasKey(PREF_USER_LOGGED_OUT) &&
-                             !isFirstLaunch;
-        
-        Debug.Log($"Would Auto-Login: {wouldAutoLogin}");
-        Debug.Log("=== END SIMPLE AUTO-LOGIN DEBUG ===");
+        // Removed debug method
     }
 
     [ContextMenu("Clear Simple Auto-Login Data")]
